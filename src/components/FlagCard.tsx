@@ -21,9 +21,8 @@ const FlagCard: React.FC<FlagCardProps> = ({ country, isFlipped, isShaking, onCl
       className={`
         relative h-20 cursor-pointer transition-all duration-300 
         ${isFlipped ? 'bg-green-100 border-green-300' : 'bg-white hover:bg-gray-50'} 
-        ${isShaking ? 'animate-bounce' : ''} 
+        ${isShaking ? 'animate-pulse' : ''} 
         border-2 shadow-md hover:shadow-lg
-        ${isFlipped ? 'transform rotate-y-180' : ''}
       `}
       onClick={onClick}
       style={{
@@ -40,14 +39,6 @@ const FlagCard: React.FC<FlagCardProps> = ({ country, isFlipped, isShaking, onCl
           <div className="text-4xl">{country.flag}</div>
         )}
       </div>
-      
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-          20%, 40%, 60%, 80% { transform: translateX(3px); }
-        }
-      `}</style>
     </Card>
   );
 };
