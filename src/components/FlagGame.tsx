@@ -62,6 +62,21 @@ const FlagGame = () => {
     return shuffled;
   };
 
+  const selectNewTarget = useCallback((excludedCode?: string) => {
+    const remainingFlags = gameFlags.filter(flag => 
+      !flippedFlags.has(flag.code) && flag.code !== excludedCode
+    );
+    
+    if (remainingFlags.length === 0) {
+      setGameComplete(true);
+      setIsGameActive(false);
+      return;
+    }
+    
+    const randomTarget = remainingFlags[Math.floor(Math.random() * remainingFlags.length)];
+    setCurrentTarget(randomTarget);
+  }, [gameFlags, flippedFlags]);
+
   const initializeGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
     const selectedFlags = shuffledCountries.slice(0, 25);
@@ -77,18 +92,6 @@ const FlagGame = () => {
     setShakingFlag(null);
   }, []);
 
-  const selectNewTarget = useCallback(() => {
-    const remainingFlags = gameFlags.filter(flag => !flippedFlags.has(flag.code));
-    if (remainingFlags.length === 0) {
-      setGameComplete(true);
-      setIsGameActive(false);
-      return;
-    }
-    
-    const randomTarget = remainingFlags[Math.floor(Math.random() * remainingFlags.length)];
-    setCurrentTarget(randomTarget);
-  }, [gameFlags, flippedFlags]);
-
   const handleFlagClick = (country: Country) => {
     if (!isGameActive || flippedFlags.has(country.code)) return;
 
@@ -98,9 +101,9 @@ const FlagGame = () => {
       newFlippedFlags.add(country.code);
       setFlippedFlags(newFlippedFlags);
       
-      // Select new target after a short delay
+      // Select new target immediately, excluding the just-clicked one
       setTimeout(() => {
-        selectNewTarget();
+        selectNewTarget(country.code);
       }, 500);
     } else {
       // Wrong answer - add penalty time and shake
@@ -136,7 +139,7 @@ const FlagGame = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         {gameFlags.map((country) => (
           <FlagCard
             key={country.code}
