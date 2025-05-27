@@ -78,19 +78,19 @@ const FlagGame = () => {
   }, []);
 
   const selectNewTarget = useCallback(() => {
-    const remainingFlags = gameFlags.filter(flag => !flippedFlags.has(flag.code));
-    if (remainingFlags.length === 0) {
+    if (flippedFlags.size >= gameFlags.length) {
       setGameComplete(true);
       setIsGameActive(false);
       return;
     }
     
-    const randomTarget = remainingFlags[Math.floor(Math.random() * remainingFlags.length)];
+    // Select any random flag from the game, not just unflipped ones
+    const randomTarget = gameFlags[Math.floor(Math.random() * gameFlags.length)];
     setCurrentTarget(randomTarget);
-  }, [gameFlags, flippedFlags]);
+  }, [gameFlags, flippedFlags.size]);
 
   const handleFlagClick = (country: Country) => {
-    if (!isGameActive || flippedFlags.has(country.code)) return;
+    if (!isGameActive) return;
 
     if (country.code === currentTarget?.code) {
       // Correct answer
