@@ -1,50 +1,13 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
-import Timer from './Timer';
+import GameHeader from './GameHeader';
 import GameModeSelector, { GameMode } from './GameModeSelector';
 import NameFlagGame from './NameFlagGame';
 import PopulationGame from './PopulationGame';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-interface Country {
-  name: string;
-  flag: string;
-  code: string;
-}
-
-const countries: Country[] = [
-  { name: 'United States', flag: '🇺🇸', code: 'US' },
-  { name: 'Canada', flag: '🇨🇦', code: 'CA' },
-  { name: 'United Kingdom', flag: '🇬🇧', code: 'GB' },
-  { name: 'France', flag: '🇫🇷', code: 'FR' },
-  { name: 'Germany', flag: '🇩🇪', code: 'DE' },
-  { name: 'Italy', flag: '🇮🇹', code: 'IT' },
-  { name: 'Spain', flag: '🇪🇸', code: 'ES' },
-  { name: 'Japan', flag: '🇯🇵', code: 'JP' },
-  { name: 'China', flag: '🇨🇳', code: 'CN' },
-  { name: 'Brazil', flag: '🇧🇷', code: 'BR' },
-  { name: 'Australia', flag: '🇦🇺', code: 'AU' },
-  { name: 'India', flag: '🇮🇳', code: 'IN' },
-  { name: 'Russia', flag: '🇷🇺', code: 'RU' },
-  { name: 'Mexico', flag: '🇲🇽', code: 'MX' },
-  { name: 'South Korea', flag: '🇰🇷', code: 'KR' },
-  { name: 'Netherlands', flag: '🇳🇱', code: 'NL' },
-  { name: 'Sweden', flag: '🇸🇪', code: 'SE' },
-  { name: 'Norway', flag: '🇳🇴', code: 'NO' },
-  { name: 'Switzerland', flag: '🇨🇭', code: 'CH' },
-  { name: 'Argentina', flag: '🇦🇷', code: 'AR' },
-  { name: 'South Africa', flag: '🇿🇦', code: 'ZA' },
-  { name: 'Egypt', flag: '🇪🇬', code: 'EG' },
-  { name: 'Turkey', flag: '🇹🇷', code: 'TR' },
-  { name: 'Greece', flag: '🇬🇷', code: 'GR' },
-  { name: 'Portugal', flag: '🇵🇹', code: 'PT' },
-  { name: 'Belgium', flag: '🇧🇪', code: 'BE' },
-  { name: 'Denmark', flag: '🇩🇰', code: 'DK' },
-  { name: 'Finland', flag: '🇫🇮', code: 'FI' },
-  { name: 'Poland', flag: '🇵🇱', code: 'PL' },
-  { name: 'Thailand', flag: '🇹🇭', code: 'TH' }
-];
+import { countries, Country } from '../data/countries';
+import { shuffleArray } from '../utils/gameUtils';
 
 const FlagGame = () => {
   const [gameMode, setGameMode] = useState<GameMode>('find-flag');
@@ -56,15 +19,6 @@ const FlagGame = () => {
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [shakingFlag, setShakingFlag] = useState<string | null>(null);
-
-  const shuffleArray = (array: Country[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
 
   const selectNewTarget = useCallback((excludedCode?: string) => {
     const remainingFlags = gameFlags.filter(flag => 
@@ -101,17 +55,14 @@ const FlagGame = () => {
     if (!isGameActive || flippedFlags.has(country.code)) return;
 
     if (country.code === currentTarget?.code) {
-      // Correct answer
       const newFlippedFlags = new Set(flippedFlags);
       newFlippedFlags.add(country.code);
       setFlippedFlags(newFlippedFlags);
       
-      // Select new target immediately, excluding the just-clicked one
       setTimeout(() => {
         selectNewTarget(country.code);
       }, 500);
     } else {
-      // Wrong answer - add penalty time and shake
       setTimeElapsed(prev => prev + 5);
       setShakingFlag(country.code);
       setTimeout(() => setShakingFlag(null), 600);
@@ -168,22 +119,11 @@ const FlagGame = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <Timer timeElapsed={timeElapsed} />
-        <Button 
-          onClick={handleBackToMenu}
-          variant="outline"
-          className="mr-2"
-        >
-          Back to Menu
-        </Button>
-        <Button 
-          onClick={initializeFindFlagGame}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          New Game
-        </Button>
-      </div>
+      <GameHeader
+        timeElapsed={timeElapsed}
+        onBackToMenu={handleBackToMenu}
+        onNewGame={initializeFindFlagGame}
+      />
 
       <div className="grid grid-cols-5 gap-4 mb-6">
         {gameFlags.map((country) => (

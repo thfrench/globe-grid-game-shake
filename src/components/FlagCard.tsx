@@ -1,12 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-
-interface Country {
-  name: string;
-  flag: string;
-  code: string;
-}
+import { Country } from '../data/countries';
 
 interface FlagCardProps {
   country: Country;
