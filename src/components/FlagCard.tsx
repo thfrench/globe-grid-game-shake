@@ -16,7 +16,7 @@ const FlagCard: React.FC<FlagCardProps> = ({ country, isFlipped, isShaking, onCl
       className={`
         relative aspect-square cursor-pointer transition-all duration-300 
         ${isFlipped ? 'bg-green-500 border-green-600' : 'bg-white hover:bg-gray-50'} 
-        border-2 shadow-md hover:shadow-lg p-2
+        border-2 shadow-md hover:shadow-lg
       `}
       onClick={onClick}
       style={{
@@ -24,7 +24,7 @@ const FlagCard: React.FC<FlagCardProps> = ({ country, isFlipped, isShaking, onCl
       }}
     >
       <div className="flex items-center justify-center h-full">
-        <div className="text-6xl">{country.flag}</div>
+        <div className="text-8xl">{country.flag}</div>
       </div>
     </Card>
   );

@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import GameHeader from './GameHeader';
 import GameModeSelector, { GameMode } from './GameModeSelector';
 import NameFlagGame from './NameFlagGame';
 import PopulationGame from './PopulationGame';
+import CapitalGame from './CapitalGame';
 import { Card } from '@/components/ui/card';
 import { countries, Country } from '../data/countries';
 import { shuffleArray } from '../utils/gameUtils';
@@ -115,6 +115,10 @@ const FlagGame = () => {
 
   if (gameMode === 'population-quiz') {
     return <PopulationGame onBackToMenu={handleBackToMenu} />;
+  }
+
+  if (gameMode === 'capital-quiz') {
+    return <CapitalGame onBackToMenu={handleBackToMenu} />;
   }
 
   return (
