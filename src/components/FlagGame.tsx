@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import Timer from './Timer';
 import GameModeSelector, { GameMode } from './GameModeSelector';
 import NameFlagGame from './NameFlagGame';
+import PopulationGame from './PopulationGame';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -160,6 +160,10 @@ const FlagGame = () => {
 
   if (gameMode === 'name-flag') {
     return <NameFlagGame onBackToMenu={handleBackToMenu} />;
+  }
+
+  if (gameMode === 'population-quiz') {
+    return <PopulationGame onBackToMenu={handleBackToMenu} />;
   }
 
   return (

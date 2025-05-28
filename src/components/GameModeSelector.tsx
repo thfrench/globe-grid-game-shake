@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-export type GameMode = 'find-flag' | 'name-flag';
+export type GameMode = 'find-flag' | 'name-flag' | 'population-quiz';
 
 interface GameModeSelectorProps {
   selectedMode: GameMode;
@@ -20,7 +20,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
     <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Choose Game Mode</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Button
           variant={selectedMode === 'find-flag' ? 'default' : 'outline'}
           className="h-auto p-4 flex flex-col items-center gap-2"
@@ -39,6 +39,16 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
           <div className="text-2xl">📝</div>
           <div className="font-semibold">Name the Flag</div>
           <div className="text-sm text-gray-600">Choose the country name for the flag</div>
+        </Button>
+
+        <Button
+          variant={selectedMode === 'population-quiz' ? 'default' : 'outline'}
+          className="h-auto p-4 flex flex-col items-center gap-2"
+          onClick={() => onModeSelect('population-quiz')}
+        >
+          <div className="text-2xl">👥</div>
+          <div className="font-semibold">Population Quiz</div>
+          <div className="text-sm text-gray-600">Guess which country has the given population</div>
         </Button>
       </div>
       
