@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import Timer from './Timer';
+import GameModeSelector, { GameMode } from './GameModeSelector';
+import NameFlagGame from './NameFlagGame';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -45,6 +47,8 @@ const countries: Country[] = [
 ];
 
 const FlagGame = () => {
+  const [gameMode, setGameMode] = useState<GameMode>('find-flag');
+  const [showModeSelector, setShowModeSelector] = useState(true);
   const [gameFlags, setGameFlags] = useState<Country[]>([]);
   const [currentTarget, setCurrentTarget] = useState<Country | null>(null);
   const [flippedFlags, setFlippedFlags] = useState<Set<string>>(new Set());
@@ -77,7 +81,7 @@ const FlagGame = () => {
     setCurrentTarget(randomTarget);
   }, [gameFlags, flippedFlags]);
 
-  const initializeGame = useCallback(() => {
+  const initializeFindFlagGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
     const selectedFlags = shuffledCountries.slice(0, 25);
     setGameFlags(selectedFlags);
@@ -90,6 +94,7 @@ const FlagGame = () => {
     setIsGameActive(true);
     setGameComplete(false);
     setShakingFlag(null);
+    setShowModeSelector(false);
   }, []);
 
   const handleFlagClick = (country: Country) => {
@@ -113,26 +118,63 @@ const FlagGame = () => {
     }
   };
 
-  useEffect(() => {
-    initializeGame();
-  }, [initializeGame]);
+  const handleModeSelect = (mode: GameMode) => {
+    setGameMode(mode);
+  };
+
+  const handleStartGame = () => {
+    if (gameMode === 'find-flag') {
+      initializeFindFlagGame();
+    } else {
+      setShowModeSelector(false);
+    }
+  };
+
+  const handleBackToMenu = () => {
+    setShowModeSelector(true);
+    setIsGameActive(false);
+    setGameComplete(false);
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isGameActive) {
+    if (isGameActive && gameMode === 'find-flag') {
       interval = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isGameActive]);
+  }, [isGameActive, gameMode]);
+
+  if (showModeSelector) {
+    return (
+      <div className="w-full max-w-4xl mx-auto">
+        <GameModeSelector
+          selectedMode={gameMode}
+          onModeSelect={handleModeSelect}
+          onStartGame={handleStartGame}
+        />
+      </div>
+    );
+  }
+
+  if (gameMode === 'name-flag') {
+    return <NameFlagGame onBackToMenu={handleBackToMenu} />;
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <Timer timeElapsed={timeElapsed} />
         <Button 
-          onClick={initializeGame}
+          onClick={handleBackToMenu}
+          variant="outline"
+          className="mr-2"
+        >
+          Back to Menu
+        </Button>
+        <Button 
+          onClick={initializeFindFlagGame}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           New Game
