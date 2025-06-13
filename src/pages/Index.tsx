@@ -13,12 +13,12 @@ const Index = () => {
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/70 to-indigo-800/70"></div>
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="text-center mb-8 px-4">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+      <div className="relative z-10 max-w-5xl mx-auto">
+        <div className="text-center mb-6 px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
             Flag Quest
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
             Test your geography knowledge with our exciting flag games!
           </p>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -78,12 +77,12 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
           setIncorrectOptions(new Set());
           setFeedback(null);
         }
-      }, 300);
+      }, 100);
     } else {
       setTimeElapsed(prev => prev + 5);
       setIncorrectOptions(prev => new Set([...prev, countryCode]));
       setFeedback('incorrect');
-      setTimeout(() => setFeedback(null), 1000);
+      setTimeout(() => setFeedback(null), 800);
     }
   };
 
@@ -122,7 +121,7 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Which country has this capital city?
           </h2>
-          <div className="text-3xl font-bold text-blue-600 mb-4">
+          <div className="text-4xl font-bold text-blue-600 mb-4">
             {currentCountry.capital}
           </div>
           <div className="text-lg text-gray-600">
@@ -151,7 +150,7 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
                 disabled={selectedAnswer !== null || incorrectOptions.has(option.code)}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{option.flag}</span>
+                  <span className="text-3xl">{option.flag}</span>
                   <span className="text-lg font-medium">{option.name}</span>
                 </div>
               </Button>
