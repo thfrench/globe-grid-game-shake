@@ -113,10 +113,12 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
               <div className="text-center text-sm text-gray-500">Loading...</div>
             ) : personalScores.length > 0 ? (
               <div className="space-y-1 text-sm">
-                {personalScores.slice(0, 5).map((score, index) => (
-                  <div key={score.id} className="flex justify-between">
+                {Array.from({ length: 5 }, (_, i) => personalScores[i] ?? null).map((score, index) => (
+                  <div key={index} className="flex justify-between">
                     <span>{index + 1}. {user ? 'Your best' : 'Best time'}</span>
-                    <span className="font-mono">{formatTime(score.time_elapsed)}</span>
+                    <span className="font-mono">
+                      {score ? formatTime(score.time_elapsed) : '--:--'}
+                    </span>
                   </div>
                 ))}
               </div>

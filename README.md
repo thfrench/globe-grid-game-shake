@@ -66,6 +66,8 @@ When you finish a game while not logged in, you're prompted to enter a name.
 This name is stored in your browser so your best times are saved between
 sessions. The current name is shown in the top left corner of the page and can
 be edited by clicking on it.
+Empty slots in your personal high-score list show `--:--` until you've
+recorded more times.
 
 ## How can I deploy this project?
 
