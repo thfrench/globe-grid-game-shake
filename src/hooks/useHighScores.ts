@@ -22,7 +22,7 @@ export const useHighScores = (gameMode: string) => {
   const fetchHighScores = async () => {
     setLoading(true);
     
-    // Fetch global high scores with proper join
+    // Fetch global high scores with proper join using user_id
     const { data: globalData } = await supabase
       .from('high_scores')
       .select(`
@@ -31,7 +31,7 @@ export const useHighScores = (gameMode: string) => {
         time_elapsed,
         created_at,
         user_id,
-        profiles!high_scores_user_id_fkey(display_name)
+        profiles(display_name)
       `)
       .eq('game_mode', gameMode)
       .order('time_elapsed', { ascending: true })
@@ -61,7 +61,7 @@ export const useHighScores = (gameMode: string) => {
           time_elapsed,
           created_at,
           user_id,
-          profiles!high_scores_user_id_fkey(display_name)
+          profiles(display_name)
         `)
         .eq('game_mode', gameMode)
         .eq('user_id', user.id)
