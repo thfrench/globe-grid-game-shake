@@ -88,7 +88,6 @@ export const countries: Country[] = [
   { name: 'Uzbekistan', flag: '🇺🇿', code: 'UZ', population: 34200000, capital: 'Tashkent' },
   { name: 'Malaysia', flag: '🇲🇾', code: 'MY', population: 32400000, capital: 'Kuala Lumpur' },
   { name: 'Nepal', flag: '🇳🇵', code: 'NP', population: 29100000, capital: 'Kathmandu' },
-  // Capital contains an apostrophe, escape it properly
   { name: 'Yemen', flag: '🇾🇪', code: 'YE', population: 30500000, capital: 'Sana\'a' },
   { name: 'North Korea', flag: '🇰🇵', code: 'KP', population: 25800000, capital: 'Pyongyang' },
   { name: 'Sri Lanka', flag: '🇱🇰', code: 'LK', population: 22200000, capital: 'Colombo' },
@@ -138,7 +137,6 @@ export const countries: Country[] = [
   { name: 'Zambia', flag: '🇿🇲', code: 'ZM', population: 18400000, capital: 'Lusaka' },
   { name: 'Senegal', flag: '🇸🇳', code: 'SN', population: 17200000, capital: 'Dakar' },
   { name: 'Somalia', flag: '🇸🇴', code: 'SO', population: 16400000, capital: 'Mogadishu' },
-  // Capital contains an apostrophe, escape it properly
   { name: 'Chad', flag: '🇹🇩', code: 'TD', population: 16400000, capital: 'N\'Djamena' },
   { name: 'Zimbabwe', flag: '🇿🇼', code: 'ZW', population: 15100000, capital: 'Harare' },
   { name: 'Guinea', flag: '🇬🇳', code: 'GN', population: 13100000, capital: 'Conakry' },
@@ -176,7 +174,6 @@ export const countries: Country[] = [
   { name: 'Vanuatu', flag: '🇻🇺', code: 'VU', population: 320000, capital: 'Port Vila' },
   { name: 'Samoa', flag: '🇼🇸', code: 'WS', population: 200000, capital: 'Apia' },
   { name: 'Micronesia', flag: '🇫🇲', code: 'FM', population: 115000, capital: 'Palikir' },
-  // Capital contains an apostrophe, escape it properly
   { name: 'Tonga', flag: '🇹🇴', code: 'TO', population: 110000, capital: 'Nuku\'alofa' },
   { name: 'Palau', flag: '🇵🇼', code: 'PW', population: 18000, capital: 'Ngerulmud' }
 ];

@@ -20,7 +20,7 @@ const ProfileSettings: React.FC = () => {
   }, [user]);
 
   const fetchProfile = async () => {
-    if (!user) return null;
+    if (!user) return;
 
     const { data, error } = await supabase
       .from('profiles')
@@ -28,25 +28,13 @@ const ProfileSettings: React.FC = () => {
       .eq('id', user.id)
       .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load profile',
-        variant: 'destructive'
-      });
-      return error;
-    }
-
     if (data) {
       setDisplayName(data.display_name || '');
     }
-
-    return null;
   };
 
   const updateProfile = async () => {
-    if (!user) return null;
+    if (!user) return;
 
     setLoading(true);
     const { error } = await supabase
@@ -58,20 +46,18 @@ const ProfileSettings: React.FC = () => {
       });
 
     if (error) {
-      console.error('Error updating profile:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update profile',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive"
       });
     } else {
       toast({
-        title: 'Success',
-        description: 'Profile updated successfully'
+        title: "Success",
+        description: "Profile updated successfully"
       });
     }
     setLoading(false);
-    return error ?? null;
   };
 
   if (!user) return null;

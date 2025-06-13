@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 
 export interface HighScore {
   id: string;
@@ -16,16 +15,15 @@ export interface HighScore {
 
 export const useHighScores = (gameMode: string) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [globalScores, setGlobalScores] = useState<HighScore[]>([]);
   const [personalScores, setPersonalScores] = useState<HighScore[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchHighScores = async () => {
     setLoading(true);
-
+    
     // Fetch global high scores with proper join using the foreign key relationship
-    const { data: globalData, error: globalError } = await supabase
+    const { data: globalData } = await supabase
       .from('high_scores')
       .select(`
         id,
@@ -38,17 +36,6 @@ export const useHighScores = (gameMode: string) => {
       .eq('game_mode', gameMode)
       .order('time_elapsed', { ascending: true })
       .limit(10);
-
-    if (globalError) {
-      console.error(globalError);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch global high scores',
-        variant: 'destructive'
-      });
-      setLoading(false);
-      return;
-    }
 
     if (globalData) {
       // Transform the data to match our interface
@@ -66,7 +53,7 @@ export const useHighScores = (gameMode: string) => {
 
     // Fetch personal high scores if user is logged in
     if (user) {
-      const { data: personalData, error: personalError } = await supabase
+      const { data: personalData } = await supabase
         .from('high_scores')
         .select(`
           id,
@@ -80,17 +67,6 @@ export const useHighScores = (gameMode: string) => {
         .eq('user_id', user.id)
         .order('time_elapsed', { ascending: true })
         .limit(5);
-
-      if (personalError) {
-        console.error(personalError);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch your high scores',
-          variant: 'destructive'
-        });
-        setLoading(false);
-        return;
-      }
 
       if (personalData) {
         // Transform the data to match our interface
@@ -122,17 +98,9 @@ export const useHighScores = (gameMode: string) => {
         time_elapsed: timeElapsed
       });
 
-    if (error) {
-      console.error(error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit score',
-        variant: 'destructive'
-      });
-      return;
+    if (!error) {
+      fetchHighScores(); // Refresh scores after submission
     }
-
-    fetchHighScores(); // Refresh scores after submission
   };
 
   useEffect(() => {
