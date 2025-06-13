@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import GameHeader from './GameHeader';
 import GameModeSelector, { GameMode } from './GameModeSelector';
 import NameFlagGame from './NameFlagGame';
-import PopulationGame from './PopulationGame';
 import CapitalGame from './CapitalGame';
 import { Card } from '@/components/ui/card';
 import { countries, Country } from '../data/countries';
@@ -61,7 +61,7 @@ const FlagGame = () => {
       
       setTimeout(() => {
         selectNewTarget(country.code);
-      }, 500);
+      }, 300);
     } else {
       setTimeElapsed(prev => prev + 5);
       setShakingFlag(country.code);
@@ -111,10 +111,6 @@ const FlagGame = () => {
 
   if (gameMode === 'name-flag') {
     return <NameFlagGame onBackToMenu={handleBackToMenu} />;
-  }
-
-  if (gameMode === 'population-quiz') {
-    return <PopulationGame onBackToMenu={handleBackToMenu} />;
   }
 
   if (gameMode === 'capital-quiz') {

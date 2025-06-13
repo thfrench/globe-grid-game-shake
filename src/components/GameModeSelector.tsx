@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-export type GameMode = 'find-flag' | 'name-flag' | 'population-quiz' | 'capital-quiz';
+export type GameMode = 'find-flag' | 'name-flag' | 'capital-quiz';
 
 interface GameModeSelectorProps {
   selectedMode: GameMode;
@@ -17,54 +17,50 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   onStartGame 
 }) => {
   return (
-    <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Choose Game Mode</h2>
+    <Card className="p-8 text-center bg-white/90 backdrop-blur-sm shadow-xl">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">Choose Game Mode</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Button
           variant={selectedMode === 'find-flag' ? 'default' : 'outline'}
-          className="h-auto p-4 flex flex-col items-center gap-2"
+          className="h-auto p-6 flex flex-col items-center gap-3 text-center"
           onClick={() => onModeSelect('find-flag')}
         >
-          <div className="text-2xl">🔍</div>
-          <div className="font-semibold">Find the Flag</div>
-          <div className="text-sm text-gray-600">Click the correct flag from the grid</div>
+          <div className="text-3xl">🔍</div>
+          <div className="font-semibold text-lg">Find the Flag</div>
+          <div className="text-sm text-gray-600 leading-relaxed">
+            Click the correct flag from the grid
+          </div>
         </Button>
         
         <Button
           variant={selectedMode === 'name-flag' ? 'default' : 'outline'}
-          className="h-auto p-4 flex flex-col items-center gap-2"
+          className="h-auto p-6 flex flex-col items-center gap-3 text-center"
           onClick={() => onModeSelect('name-flag')}
         >
-          <div className="text-2xl">📝</div>
-          <div className="font-semibold">Name the Flag</div>
-          <div className="text-sm text-gray-600">Choose the country name for the flag</div>
-        </Button>
-
-        <Button
-          variant={selectedMode === 'population-quiz' ? 'default' : 'outline'}
-          className="h-auto p-4 flex flex-col items-center gap-2"
-          onClick={() => onModeSelect('population-quiz')}
-        >
-          <div className="text-2xl">👥</div>
-          <div className="font-semibold">Population Quiz</div>
-          <div className="text-sm text-gray-600">Guess which country has the given population</div>
+          <div className="text-3xl">📝</div>
+          <div className="font-semibold text-lg">Name the Flag</div>
+          <div className="text-sm text-gray-600 leading-relaxed">
+            Choose the country name for the flag
+          </div>
         </Button>
 
         <Button
           variant={selectedMode === 'capital-quiz' ? 'default' : 'outline'}
-          className="h-auto p-4 flex flex-col items-center gap-2"
+          className="h-auto p-6 flex flex-col items-center gap-3 text-center"
           onClick={() => onModeSelect('capital-quiz')}
         >
-          <div className="text-2xl">🏛️</div>
-          <div className="font-semibold">Capital Quiz</div>
-          <div className="text-sm text-gray-600">Guess which country has the given capital</div>
+          <div className="text-3xl">🏛️</div>
+          <div className="font-semibold text-lg">Capital Quiz</div>
+          <div className="text-sm text-gray-600 leading-relaxed">
+            Guess which country has the given capital
+          </div>
         </Button>
       </div>
       
       <Button 
         onClick={onStartGame}
-        className="bg-blue-600 hover:bg-blue-700 text-white"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
         size="lg"
       >
         Start Game

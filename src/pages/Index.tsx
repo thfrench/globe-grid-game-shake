@@ -3,11 +3,24 @@ import FlagGame from '@/components/FlagGame';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Flag Quest</h1>
-          <p className="text-lg text-gray-600">Test your geography knowledge by clicking the correct flag!</p>
+    <div 
+      className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 p-4 relative overflow-hidden"
+      style={{
+        backgroundImage: `url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundBlendMode: 'overlay'
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/70 to-indigo-800/70"></div>
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <div className="text-center mb-8 px-4">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+            Flag Quest
+          </h1>
+          <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+            Test your geography knowledge with our exciting flag games!
+          </p>
         </div>
         <FlagGame />
       </div>

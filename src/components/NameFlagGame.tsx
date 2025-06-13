@@ -21,6 +21,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
+  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
   const initializeGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
@@ -37,6 +38,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
     setTimeElapsed(0);
     setIsGameActive(true);
     setGameComplete(false);
+    setFeedback(null);
   }, []);
 
   const handleOptionClick = (option: Country) => {
@@ -44,6 +46,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
 
     if (option.code === currentFlag?.code) {
       setSelectedOption(option.code);
+      setFeedback('correct');
       
       setTimeout(() => {
         const nextIndex = currentQuestionIndex + 1;
@@ -57,11 +60,14 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
           setCurrentQuestionIndex(nextIndex);
           setSelectedOption(null);
           setIncorrectOptions(new Set());
+          setFeedback(null);
         }
-      }, 1000);
+      }, 300);
     } else {
       setTimeElapsed(prev => prev + 5);
       setIncorrectOptions(prev => new Set([...prev, option.code]));
+      setFeedback('incorrect');
+      setTimeout(() => setFeedback(null), 1000);
     }
   };
 
@@ -96,6 +102,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
         currentQuestion={currentQuestionIndex}
         totalQuestions={25}
         onBackToMenu={onBackToMenu}
+        feedback={feedback}
       />
 
       {gameComplete ? (
@@ -107,7 +114,6 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
       ) : currentFlag ? (
         <div className="space-y-6">
           <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">What country is this flag from?</h2>
             <div className="text-8xl mb-6">{currentFlag.flag}</div>
           </Card>
 

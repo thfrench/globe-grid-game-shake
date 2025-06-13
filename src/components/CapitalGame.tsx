@@ -16,12 +16,13 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
   const [score, setScore] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [questions, setQuestions] = useState<Country[]>([]);
   const [currentOptions, setCurrentOptions] = useState<Country[]>([]);
+  const [incorrectOptions, setIncorrectOptions] = useState<Set<string>>(new Set());
+  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
-  const totalQuestions = 10;
+  const totalQuestions = 25;
 
   const initializeGame = useCallback(() => {
     const countriesWithCapitals = countries.filter(country => country.capital);
@@ -38,8 +39,9 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
     setScore(0);
     setTimeElapsed(0);
     setSelectedAnswer(null);
-    setIsAnswerRevealed(false);
     setGameComplete(false);
+    setIncorrectOptions(new Set());
+    setFeedback(null);
   }, []);
 
   useEffect(() => {
@@ -48,36 +50,41 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!gameComplete && !isAnswerRevealed) {
+      if (!gameComplete) {
         setTimeElapsed(prev => prev + 1);
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameComplete, isAnswerRevealed]);
+  }, [gameComplete]);
 
   const handleAnswerSelect = (countryCode: string) => {
-    if (isAnswerRevealed) return;
-    
-    setSelectedAnswer(countryCode);
-    setIsAnswerRevealed(true);
+    if (selectedAnswer || incorrectOptions.has(countryCode)) return;
     
     if (countryCode === questions[currentQuestion].code) {
+      setSelectedAnswer(countryCode);
       setScore(prev => prev + 1);
+      setFeedback('correct');
+      
+      setTimeout(() => {
+        if (currentQuestion + 1 >= totalQuestions) {
+          setGameComplete(true);
+        } else {
+          const nextQuestion = currentQuestion + 1;
+          setCurrentQuestion(nextQuestion);
+          const countriesWithCapitals = countries.filter(country => country.capital);
+          const options = generateOptions(questions[nextQuestion], countriesWithCapitals);
+          setCurrentOptions(options);
+          setSelectedAnswer(null);
+          setIncorrectOptions(new Set());
+          setFeedback(null);
+        }
+      }, 300);
+    } else {
+      setTimeElapsed(prev => prev + 5);
+      setIncorrectOptions(prev => new Set([...prev, countryCode]));
+      setFeedback('incorrect');
+      setTimeout(() => setFeedback(null), 1000);
     }
-    
-    setTimeout(() => {
-      if (currentQuestion + 1 >= totalQuestions) {
-        setGameComplete(true);
-      } else {
-        const nextQuestion = currentQuestion + 1;
-        setCurrentQuestion(nextQuestion);
-        const countriesWithCapitals = countries.filter(country => country.capital);
-        const options = generateOptions(questions[nextQuestion], countriesWithCapitals);
-        setCurrentOptions(options);
-        setSelectedAnswer(null);
-        setIsAnswerRevealed(false);
-      }
-    }, 1500);
   };
 
   if (gameComplete) {
@@ -107,6 +114,7 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
         currentQuestion={currentQuestion}
         totalQuestions={totalQuestions}
         onBackToMenu={onBackToMenu}
+        feedback={feedback}
       />
 
       <Card className="p-6 mb-6 bg-white/80 backdrop-blur-sm">
@@ -126,16 +134,12 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
           {currentOptions.map((option) => {
             let buttonClass = "w-full p-4 text-left border-2 transition-all duration-200";
             
-            if (!isAnswerRevealed) {
-              buttonClass += " border-gray-300 hover:border-blue-400 bg-white hover:bg-blue-50";
+            if (selectedAnswer === option.code) {
+              buttonClass += " border-green-500 bg-green-100 text-green-800";
+            } else if (incorrectOptions.has(option.code)) {
+              buttonClass += " border-red-500 bg-red-100 text-red-800 cursor-not-allowed";
             } else {
-              if (option.code === currentCountry.code) {
-                buttonClass += " border-green-500 bg-green-100 text-green-800";
-              } else if (option.code === selectedAnswer) {
-                buttonClass += " border-red-500 bg-red-100 text-red-800";
-              } else {
-                buttonClass += " border-gray-300 bg-gray-100 text-gray-600";
-              }
+              buttonClass += " border-gray-300 hover:border-blue-400 bg-white hover:bg-blue-50";
             }
 
             return (
@@ -144,7 +148,7 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
                 variant="ghost"
                 className={buttonClass}
                 onClick={() => handleAnswerSelect(option.code)}
-                disabled={isAnswerRevealed}
+                disabled={selectedAnswer !== null || incorrectOptions.has(option.code)}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{option.flag}</span>

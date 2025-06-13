@@ -9,6 +9,7 @@ interface GameHeaderProps {
   totalQuestions?: number;
   onBackToMenu: () => void;
   onNewGame?: () => void;
+  feedback?: 'correct' | 'incorrect' | null;
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({
@@ -16,16 +17,26 @@ const GameHeader: React.FC<GameHeaderProps> = ({
   currentQuestion,
   totalQuestions,
   onBackToMenu,
-  onNewGame
+  onNewGame,
+  feedback
 }) => {
   return (
     <div className="flex justify-between items-center mb-6">
       <Timer timeElapsed={timeElapsed} />
-      {currentQuestion !== undefined && totalQuestions && (
-        <div className="text-lg font-semibold text-gray-700">
-          {currentQuestion + 1} / {totalQuestions}
-        </div>
-      )}
+      <div className="flex items-center gap-4">
+        {currentQuestion !== undefined && totalQuestions && (
+          <div className="text-lg font-semibold text-gray-700">
+            {currentQuestion + 1} / {totalQuestions}
+          </div>
+        )}
+        {feedback && (
+          <div className={`text-lg font-bold animate-fade-in ${
+            feedback === 'correct' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {feedback === 'correct' ? 'Correct!' : 'Incorrect!'}
+          </div>
+        )}
+      </div>
       <div className="flex gap-2">
         <Button onClick={onBackToMenu} variant="outline">
           Back to Menu
