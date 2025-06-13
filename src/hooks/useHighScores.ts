@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlayerName } from './usePlayerName';
 
 export interface HighScore {
   id: string;
@@ -13,13 +14,22 @@ export interface HighScore {
   };
 }
 
+interface LocalScoreData {
+  score: number;
+  time_elapsed: number;
+  created_at: string;
+}
+
+const localScoresKey = (gameMode: string) => `local_scores_${gameMode}`;
+
 export const useHighScores = (gameMode: string) => {
   const { user } = useAuth();
+  const { playerName } = usePlayerName();
   const [globalScores, setGlobalScores] = useState<HighScore[]>([]);
   const [personalScores, setPersonalScores] = useState<HighScore[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchHighScores = async () => {
+  const fetchHighScores = useCallback(async () => {
     setLoading(true);
     
     // Fetch global high scores with proper join using the foreign key relationship
@@ -81,13 +91,39 @@ export const useHighScores = (gameMode: string) => {
         }));
         setPersonalScores(transformedPersonalData);
       }
+    } else {
+      const raw = localStorage.getItem(localScoresKey(gameMode));
+      if (raw) {
+        const data: LocalScoreData[] = JSON.parse(raw);
+        const mapped = data
+          .sort((a, b) => a.time_elapsed - b.time_elapsed)
+          .slice(0, 5)
+          .map((s, index) => ({
+            id: index.toString(),
+            score: s.score,
+            time_elapsed: s.time_elapsed,
+            created_at: s.created_at,
+            profiles: { display_name: playerName || 'Anonymous' }
+          }));
+        setPersonalScores(mapped);
+      } else {
+        setPersonalScores([]);
+      }
     }
 
     setLoading(false);
-  };
+  }, [gameMode, user, playerName]);
 
   const submitScore = async (score: number, timeElapsed: number) => {
-    if (!user) return;
+    const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
+    const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
+    localData.push({ score, time_elapsed: timeElapsed, created_at: new Date().toISOString() });
+    localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
+
+    if (!user) {
+      fetchHighScores();
+      return;
+    }
 
     const { error } = await supabase
       .from('high_scores')
@@ -105,7 +141,7 @@ export const useHighScores = (gameMode: string) => {
 
   useEffect(() => {
     fetchHighScores();
-  }, [gameMode, user]);
+  }, [fetchHighScores]);
 
   return {
     globalScores,
