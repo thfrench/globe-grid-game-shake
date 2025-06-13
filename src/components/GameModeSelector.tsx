@@ -62,16 +62,10 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
             </Button>
           ))}
         </div>
-      </Card>
 
-      {selectedModeData && (
-        <Card className="p-4 bg-white/90 backdrop-blur-sm shadow-xl">
-          <div className="text-center mb-4">
-            <div className="text-3xl mb-2">{selectedModeData.icon}</div>
-            <h3 className="text-lg font-bold text-gray-800 mb-2">{selectedModeData.title}</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">{selectedModeData.description}</p>
-          </div>
-          <div className="text-center">
+        {selectedModeData && (
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">{selectedModeData.description}</p>
             <Button 
               onClick={onStartGame}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
@@ -80,8 +74,8 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
               Start Game
             </Button>
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="p-4 bg-white/90 backdrop-blur-sm shadow-xl">
