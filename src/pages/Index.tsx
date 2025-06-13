@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import FlagGame from '@/components/FlagGame';
 import AuthButton from '@/components/AuthButton';
 import ProfileSettings from '@/components/ProfileSettings';
+import Leaderboards from '@/components/Leaderboards';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
@@ -10,8 +11,8 @@ const Index = () => {
   const [showProfile, setShowProfile] = useState(false);
 
   return (
-    <div 
-      className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 p-4 relative overflow-hidden"
+    <div
+      className="min-h-screen bg-gradient-to-br from-blue-300 via-blue-400 to-indigo-500 py-8 px-4 relative overflow-hidden"
       style={{
         backgroundImage: `url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')`,
         backgroundSize: 'cover',
@@ -19,7 +20,7 @@ const Index = () => {
         backgroundBlendMode: 'overlay'
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/70 to-indigo-800/70"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/60 to-indigo-800/60"></div>
       
       <div className="relative z-10 max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
@@ -38,7 +39,7 @@ const Index = () => {
         </div>
 
         <div className="text-center mb-6 px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg">
             Flag Quest
           </h1>
           <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
@@ -53,6 +54,10 @@ const Index = () => {
         )}
 
         <FlagGame />
+
+        <div className="mt-8">
+          <Leaderboards gameMode="find-flag" />
+        </div>
       </div>
     </div>
   );
