@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useHighScores } from '@/hooks/useHighScores';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatTime } from '@/utils/gameUtils';
 
 export type GameMode = 'find-flag' | 'name-flag' | 'capital-quiz';
@@ -19,7 +18,6 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   onModeSelect, 
   onStartGame 
 }) => {
-  const { user } = useAuth();
   const { globalScores, personalScores, loading } = useHighScores(selectedMode);
 
   const gameModes = [
@@ -89,12 +87,12 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
               <div className="text-center text-sm text-gray-500">Loading...</div>
             ) : globalScores.length > 0 ? (
               <div className="space-y-1 text-sm">
-                {globalScores.slice(0, 5).map((score, index) => (
-                  <div key={score.id} className="flex justify-between">
-                    <span>{index + 1}. {score.profiles.display_name || 'Anonymous'}</span>
-                    <span className="font-mono">{formatTime(score.time_elapsed)}</span>
-                  </div>
-                ))}
+                  {globalScores.slice(0, 5).map((score, index) => (
+                    <div key={score.id} className="flex justify-between">
+                      <span>{index + 1}. {score.player_name || 'Anonymous'}</span>
+                      <span className="font-mono">{formatTime(score.time_elapsed)}</span>
+                    </div>
+                  ))}
               </div>
             ) : (
               <div className="text-sm text-gray-500 italic text-center">
@@ -105,7 +103,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
 
           <Card className="p-4 bg-white/90 backdrop-blur-sm shadow-xl">
             <h4 className="font-semibold text-gray-800 mb-3 text-center">👤 Your Best Times</h4>
-            {!user && personalScores.length === 0 ? (
+            {personalScores.length === 0 ? (
               <div className="text-sm text-gray-500 italic text-center">
                 Play a game to see your scores!
               </div>
@@ -115,7 +113,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
               <div className="space-y-1 text-sm">
                 {Array.from({ length: 5 }, (_, i) => personalScores[i] ?? null).map((score, index) => (
                   <div key={index} className="flex justify-between">
-                    <span>{index + 1}. {user ? 'Your best' : 'Best time'}</span>
+                    <span>{index + 1}. Best time</span>
                     <span className="font-mono">
                       {score ? formatTime(score.time_elapsed) : '--:--'}
                     </span>
