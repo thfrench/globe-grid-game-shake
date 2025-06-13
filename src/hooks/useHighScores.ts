@@ -22,7 +22,7 @@ export const useHighScores = (gameMode: string) => {
   const fetchHighScores = async () => {
     setLoading(true);
     
-    // Fetch global high scores
+    // Fetch global high scores with proper join
     const { data: globalData } = await supabase
       .from('high_scores')
       .select(`
@@ -30,14 +30,25 @@ export const useHighScores = (gameMode: string) => {
         score,
         time_elapsed,
         created_at,
-        profiles!inner(display_name)
+        user_id,
+        profiles!high_scores_user_id_fkey(display_name)
       `)
       .eq('game_mode', gameMode)
       .order('time_elapsed', { ascending: true })
       .limit(10);
 
     if (globalData) {
-      setGlobalScores(globalData);
+      // Transform the data to match our interface
+      const transformedGlobalData = globalData.map(item => ({
+        id: item.id,
+        score: item.score,
+        time_elapsed: item.time_elapsed,
+        created_at: item.created_at,
+        profiles: {
+          display_name: item.profiles?.display_name || 'Anonymous'
+        }
+      }));
+      setGlobalScores(transformedGlobalData);
     }
 
     // Fetch personal high scores if user is logged in
@@ -49,7 +60,8 @@ export const useHighScores = (gameMode: string) => {
           score,
           time_elapsed,
           created_at,
-          profiles!inner(display_name)
+          user_id,
+          profiles!high_scores_user_id_fkey(display_name)
         `)
         .eq('game_mode', gameMode)
         .eq('user_id', user.id)
@@ -57,7 +69,17 @@ export const useHighScores = (gameMode: string) => {
         .limit(5);
 
       if (personalData) {
-        setPersonalScores(personalData);
+        // Transform the data to match our interface
+        const transformedPersonalData = personalData.map(item => ({
+          id: item.id,
+          score: item.score,
+          time_elapsed: item.time_elapsed,
+          created_at: item.created_at,
+          profiles: {
+            display_name: item.profiles?.display_name || 'Anonymous'
+          }
+        }));
+        setPersonalScores(transformedPersonalData);
       }
     }
 
