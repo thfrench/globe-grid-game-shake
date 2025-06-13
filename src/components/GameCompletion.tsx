@@ -1,10 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { formatTime } from '../utils/gameUtils';
 import { useHighScores } from '@/hooks/useHighScores';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlayerName } from '@/hooks/usePlayerName';
 
 interface GameCompletionProps {
   timeElapsed: number;
@@ -22,13 +24,15 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   score = 25
 }) => {
   const { user } = useAuth();
+  const { playerName, setPlayerName } = usePlayerName();
   const { submitScore } = useHighScores(gameMode);
+  const [nameInput, setNameInput] = useState(playerName);
 
   useEffect(() => {
-    if (user) {
+    if (user || playerName) {
       submitScore(score, timeElapsed);
     }
-  }, [user, score, timeElapsed, submitScore]);
+  }, [user, playerName, score, timeElapsed, submitScore]);
 
   return (
     <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
@@ -36,10 +40,18 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
       <p className="text-xl text-gray-700 mb-4">
         You completed the game in {formatTime(timeElapsed)}!
       </p>
-      {user ? (
+      {user || playerName ? (
         <p className="text-sm text-gray-600 mb-4">Your score has been saved!</p>
       ) : (
-        <p className="text-sm text-gray-600 mb-4">Sign in to save your high scores!</p>
+        <div className="mb-4 space-y-2">
+          <p className="text-sm text-gray-600">Enter your name to save scores:</p>
+          <div className="flex items-center gap-2 justify-center">
+            <Input value={nameInput} onChange={(e) => setNameInput(e.target.value)} className="w-40" />
+            <Button size="sm" onClick={() => setPlayerName(nameInput)}>
+              Save
+            </Button>
+          </div>
+        </div>
       )}
       <Button 
         onClick={onPlayAgain}

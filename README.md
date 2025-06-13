@@ -60,6 +60,15 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Local High Scores
+
+When you finish a game while not logged in, you're prompted to enter a name.
+This name is stored in your browser so your best times are saved between
+sessions. The current name is shown in the top left corner of the page and can
+be edited by clicking on it.
+Empty slots in your personal high-score list show `--:--` until you've
+recorded more times.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/c6172f6d-e92d-40b2-a445-e19bf74e1035) and click on Share -> Publish.

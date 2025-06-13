@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import FlagGame from '@/components/FlagGame';
 import AuthButton from '@/components/AuthButton';
 import ProfileSettings from '@/components/ProfileSettings';
+import PlayerName from '@/components/PlayerName';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
@@ -23,7 +24,7 @@ const Index = () => {
       
       <div className="relative z-10 max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <div></div>
+          <PlayerName />
           <div className="flex items-center gap-4">
             {user && (
               <button

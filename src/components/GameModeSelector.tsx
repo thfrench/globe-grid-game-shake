@@ -105,18 +105,20 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
 
           <Card className="p-4 bg-white/90 backdrop-blur-sm shadow-xl">
             <h4 className="font-semibold text-gray-800 mb-3 text-center">👤 Your Best Times</h4>
-            {!user ? (
+            {!user && personalScores.length === 0 ? (
               <div className="text-sm text-gray-500 italic text-center">
-                Sign in with Google to track your scores!
+                Play a game to see your scores!
               </div>
             ) : loading ? (
               <div className="text-center text-sm text-gray-500">Loading...</div>
             ) : personalScores.length > 0 ? (
               <div className="space-y-1 text-sm">
-                {personalScores.slice(0, 5).map((score, index) => (
-                  <div key={score.id} className="flex justify-between">
-                    <span>{index + 1}. Your best</span>
-                    <span className="font-mono">{formatTime(score.time_elapsed)}</span>
+                {Array.from({ length: 5 }, (_, i) => personalScores[i] ?? null).map((score, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{index + 1}. {user ? 'Your best' : 'Best time'}</span>
+                    <span className="font-mono">
+                      {score ? formatTime(score.time_elapsed) : '--:--'}
+                    </span>
                   </div>
                 ))}
               </div>
