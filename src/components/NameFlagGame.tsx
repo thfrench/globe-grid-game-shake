@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import GameHeader from './GameHeader';
 import GameCompletion from './GameCompletion';
@@ -110,6 +109,8 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
           timeElapsed={timeElapsed}
           onPlayAgain={initializeGame}
           onBackToMenu={onBackToMenu}
+          gameMode="name-flag"
+          score={25}
         />
       ) : currentFlag ? (
         <div className="space-y-6">

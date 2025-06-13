@@ -93,6 +93,8 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
           timeElapsed={timeElapsed}
           onPlayAgain={initializeGame}
           onBackToMenu={onBackToMenu}
+          gameMode="capital-quiz"
+          score={score}
         />
         <Card className="p-6 text-center bg-white/80 backdrop-blur-sm mt-4">
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Final Score</h3>
@@ -121,7 +123,7 @@ const CapitalGame: React.FC<CapitalGameProps> = ({ onBackToMenu }) => {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Which country has this capital city?
           </h2>
-          <div className="text-4xl font-bold text-blue-600 mb-4">
+          <div className="text-6xl font-bold text-blue-600 mb-4">
             {currentCountry.capital}
           </div>
           <div className="text-lg text-gray-600">

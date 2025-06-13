@@ -1,7 +1,14 @@
 
+import React, { useState } from 'react';
 import FlagGame from '@/components/FlagGame';
+import AuthButton from '@/components/AuthButton';
+import ProfileSettings from '@/components/ProfileSettings';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { user } = useAuth();
+  const [showProfile, setShowProfile] = useState(false);
+
   return (
     <div 
       className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 p-4 relative overflow-hidden"
@@ -13,7 +20,23 @@ const Index = () => {
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/70 to-indigo-800/70"></div>
+      
       <div className="relative z-10 max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div></div>
+          <div className="flex items-center gap-4">
+            {user && (
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="text-white hover:text-blue-200 transition-colors"
+              >
+                Settings
+              </button>
+            )}
+            <AuthButton />
+          </div>
+        </div>
+
         <div className="text-center mb-6 px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
             Flag Quest
@@ -22,6 +45,13 @@ const Index = () => {
             Test your geography knowledge with our exciting flag games!
           </p>
         </div>
+
+        {showProfile && user && (
+          <div className="mb-6">
+            <ProfileSettings />
+          </div>
+        )}
+
         <FlagGame />
       </div>
     </div>

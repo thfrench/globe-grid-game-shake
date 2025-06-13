@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import GameHeader from './GameHeader';
 import GameModeSelector, { GameMode } from './GameModeSelector';
 import NameFlagGame from './NameFlagGame';
 import CapitalGame from './CapitalGame';
+import GameCompletion from './GameCompletion';
 import { Card } from '@/components/ui/card';
 import { countries, Country } from '../data/countries';
 import { shuffleArray } from '../utils/gameUtils';
@@ -137,21 +137,22 @@ const FlagGame = () => {
         ))}
       </div>
 
-      <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
-        {gameComplete ? (
-          <div>
-            <h2 className="text-2xl font-bold text-green-600 mb-2">🎉 Congratulations!</h2>
-            <p className="text-lg text-gray-700">
-              You completed the game in {Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}!
-            </p>
-          </div>
-        ) : currentTarget ? (
+      {gameComplete ? (
+        <GameCompletion
+          timeElapsed={timeElapsed}
+          onPlayAgain={initializeFindFlagGame}
+          onBackToMenu={handleBackToMenu}
+          gameMode={gameMode}
+          score={25}
+        />
+      ) : currentTarget ? (
+        <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Find the flag of:</h2>
             <p className="text-2xl font-bold text-blue-600">{currentTarget.name}</p>
           </div>
-        ) : null}
-      </Card>
+        </Card>
+      ) : null}
     </div>
   );
 };
