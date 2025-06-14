@@ -14,20 +14,13 @@ const DebugClearMemory: React.FC = () => {
     }
   };
 
-  // Check for debug in hash instead of search params
-  const isDebugMode = window.location.hash.includes('debug');
-  
-  if (!isDebugMode) {
-    return null;
-  }
-
   return (
     <Button
       onClick={handleClearMemory}
       variant="destructive"
       size="sm"
       className="ml-2"
-      title="Clear all local data (debug mode)"
+      title="Clear all local data"
     >
       <Trash2 size={16} />
       Clear Memory
