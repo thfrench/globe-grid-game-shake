@@ -6,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -46,14 +47,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    return { error };
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
       options: {
-        redirectTo: redirectUrl
+        emailRedirectTo: redirectUrl
       }
     });
+    return { error };
   };
 
   const signOut = async () => {
@@ -63,7 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     session,
-    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
     signOut,
     loading
   };

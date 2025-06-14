@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import AuthModal from './AuthModal';
 
 const AuthButton: React.FC = () => {
-  const { user, signInWithGoogle, signOut, loading } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const { profile } = useProfile();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   if (loading) {
     return <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>;
@@ -34,9 +36,18 @@ const AuthButton: React.FC = () => {
   }
 
   return (
-    <Button onClick={signInWithGoogle} className="bg-blue-600 hover:bg-blue-700">
-      Sign In with Google
-    </Button>
+    <>
+      <Button 
+        onClick={() => setShowAuthModal(true)} 
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        Sign In
+      </Button>
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+      />
+    </>
   );
 };
 
