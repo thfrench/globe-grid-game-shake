@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { usePlayerName } from './usePlayerName';
@@ -129,7 +128,7 @@ export const useHighScores = (gameMode: string) => {
     try {
       console.log('Updating player name for sessionId:', sessionId, 'to:', playerName);
       
-      // Update all scores for this session with the new player name
+      // Update all scores for this session with the new player name (across ALL game modes)
       const { error } = await supabase
         .from('high_scores')
         .update({ player_name: playerName })
@@ -138,7 +137,7 @@ export const useHighScores = (gameMode: string) => {
       if (error) {
         console.error('Error updating player name in scores:', error);
       } else {
-        console.log('Player name updated in all scores for session');
+        console.log('Player name updated in all scores for session across all game modes');
         // Refresh scores after updating
         await fetchHighScores();
       }
