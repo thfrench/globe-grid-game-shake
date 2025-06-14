@@ -1,11 +1,11 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { formatTime } from '../utils/gameUtils';
 import { useHighScores } from '@/hooks/useHighScores';
-import { usePlayerName } from '@/hooks/usePlayerName';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 interface GameCompletionProps {
   timeElapsed: number;
@@ -22,35 +22,47 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   gameMode,
   score = 25
 }) => {
-  const { playerName, setPlayerName } = usePlayerName();
-  const { submitScore, updatePlayerNameInScores } = useHighScores(gameMode);
-  const [nameInput, setNameInput] = useState(playerName);
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const { submitScore } = useHighScores(gameMode);
   const scoreSubmittedRef = useRef(false);
 
   useEffect(() => {
-    // Always submit score to database with session ID and current player name
-    if (!scoreSubmittedRef.current) {
+    // Only submit score if user is authenticated
+    if (user && !scoreSubmittedRef.current) {
       scoreSubmittedRef.current = true;
-      console.log('Submitting score with current player name:', playerName);
+      console.log('Submitting score for authenticated user');
       submitScore(score, timeElapsed);
     }
-  }, [submitScore, score, timeElapsed, playerName]);
+  }, [submitScore, score, timeElapsed, user]);
 
-  const handleSaveName = async () => {
-    if (nameInput.trim()) {
-      const wasAnonymous = !playerName;
-      setPlayerName(nameInput.trim());
-      
-      // If this is the first time setting a name or changing it, update all scores for this session
-      if (wasAnonymous || nameInput.trim() !== playerName) {
-        console.log('Updating player name in all scores...');
-        // Small delay to ensure the name is saved first
-        setTimeout(async () => {
-          await updatePlayerNameInScores();
-        }, 100);
-      }
-    }
-  };
+  if (!user) {
+    return (
+      <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
+        <h2 className="text-3xl font-bold text-green-600 mb-4">🎉 Congratulations!</h2>
+        <p className="text-xl text-gray-700 mb-4">
+          You completed the game in {formatTime(timeElapsed)}!
+        </p>
+        <p className="text-sm text-gray-600 mb-4">
+          Sign in with Google to save your score to the leaderboard!
+        </p>
+        <Button 
+          onClick={onPlayAgain}
+          className="bg-blue-600 hover:bg-blue-700 text-white mr-4"
+        >
+          Play Again
+        </Button>
+        <Button 
+          onClick={onBackToMenu}
+          variant="outline"
+        >
+          Back to Menu
+        </Button>
+      </Card>
+    );
+  }
+
+  const displayName = profile?.display_name || 'Anonymous';
 
   return (
     <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
@@ -58,29 +70,9 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
       <p className="text-xl text-gray-700 mb-4">
         You completed the game in {formatTime(timeElapsed)}!
       </p>
-      {playerName ? (
-        <p className="text-sm text-gray-600 mb-4">Your score has been saved as {playerName}!</p>
-      ) : (
-        <div className="mb-4 space-y-2">
-          <p className="text-sm text-gray-600">Enter your name to update all your scores:</p>
-          <div className="flex items-center gap-2 justify-center">
-            <Input 
-              value={nameInput} 
-              onChange={(e) => setNameInput(e.target.value)} 
-              className="w-40" 
-              placeholder="Enter your name"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSaveName();
-                }
-              }}
-            />
-            <Button size="sm" onClick={handleSaveName} disabled={!nameInput.trim()}>
-              Save
-            </Button>
-          </div>
-        </div>
-      )}
+      <p className="text-sm text-gray-600 mb-4">
+        Your score has been saved as {displayName}!
+      </p>
       <Button 
         onClick={onPlayAgain}
         className="bg-blue-600 hover:bg-blue-700 text-white mr-4"

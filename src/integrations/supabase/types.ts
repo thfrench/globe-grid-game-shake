@@ -14,28 +14,25 @@ export type Database = {
           created_at: string
           game_mode: string
           id: string
-          player_name: string | null
           score: number
           time_elapsed: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
           game_mode: string
           id?: string
-          player_name?: string | null
           score: number
           time_elapsed: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
           game_mode?: string
           id?: string
-          player_name?: string | null
           score?: number
           time_elapsed?: number
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

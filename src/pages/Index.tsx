@@ -2,7 +2,7 @@
 import React from 'react';
 import FlagGame from '@/components/FlagGame';
 import PlayerName from '@/components/PlayerName';
-import DebugClearMemory from '@/components/DebugClearMemory';
+import AuthButton from '@/components/AuthButton';
 
 const Index = () => {
   return (
@@ -19,10 +19,10 @@ const Index = () => {
       
       <div className="relative z-10 max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <PlayerName />
-            <DebugClearMemory />
           </div>
+          <AuthButton />
         </div>
 
         <div className="text-center mb-6 px-4">

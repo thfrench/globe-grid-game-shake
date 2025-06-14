@@ -1,19 +1,22 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { usePlayerName } from './usePlayerName';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface HighScore {
   id: string;
   score: number;
   time_elapsed: number;
   created_at: string;
-  player_name: string;
+  user_id: string;
+  game_mode: string;
+  profiles?: {
+    display_name: string | null;
+  };
 }
 
-const localScoresKey = (gameMode: string) => `local_scores_${gameMode}`;
-
 export const useHighScores = (gameMode: string) => {
-  const { playerName, sessionId } = usePlayerName();
+  const { user } = useAuth();
   const [globalScores, setGlobalScores] = useState<HighScore[]>([]);
   const [personalScores, setPersonalScores] = useState<HighScore[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,12 +26,15 @@ export const useHighScores = (gameMode: string) => {
     setLoading(true);
     
     try {
-      console.log('Fetching scores with sessionId:', sessionId);
-      
-      // Fetch global high scores - show all scores including anonymous ones
+      // Fetch global high scores with profile information
       const { data: globalData, error: globalError } = await supabase
         .from('high_scores')
-        .select('*')
+        .select(`
+          *,
+          profiles (
+            display_name
+          )
+        `)
         .eq('game_mode', gameMode)
         .order('time_elapsed', { ascending: true })
         .limit(10);
@@ -36,47 +42,47 @@ export const useHighScores = (gameMode: string) => {
       if (globalError) {
         console.error('Error fetching global scores:', globalError);
       } else if (globalData) {
-        const transformedGlobalData = globalData.map(item => ({
-          id: item.id,
-          score: item.score,
-          time_elapsed: item.time_elapsed,
-          created_at: item.created_at,
-          player_name: item.player_name || 'Anonymous'
-        }));
-        setGlobalScores(transformedGlobalData);
-        console.log('Global scores fetched:', transformedGlobalData);
+        setGlobalScores(globalData);
+        console.log('Global scores fetched:', globalData);
       }
 
-      // Fetch personal scores by session ID
-      const { data: personalData, error: personalError } = await supabase
-        .from('high_scores')
-        .select('*')
-        .eq('game_mode', gameMode)
-        .eq('user_id', sessionId)
-        .order('time_elapsed', { ascending: true })
-        .limit(5);
+      // Fetch personal scores if user is logged in
+      if (user) {
+        const { data: personalData, error: personalError } = await supabase
+          .from('high_scores')
+          .select(`
+            *,
+            profiles (
+              display_name
+            )
+          `)
+          .eq('game_mode', gameMode)
+          .eq('user_id', user.id)
+          .order('time_elapsed', { ascending: true })
+          .limit(5);
 
-      if (personalError) {
-        console.error('Error fetching personal scores:', personalError);
-      } else if (personalData) {
-        const transformedPersonalData = personalData.map(item => ({
-          id: item.id,
-          score: item.score,
-          time_elapsed: item.time_elapsed,
-          created_at: item.created_at,
-          player_name: item.player_name || playerName || 'Anonymous'
-        }));
-        setPersonalScores(transformedPersonalData);
-        console.log('Personal scores fetched:', transformedPersonalData);
+        if (personalError) {
+          console.error('Error fetching personal scores:', personalError);
+        } else if (personalData) {
+          setPersonalScores(personalData);
+          console.log('Personal scores fetched:', personalData);
+        }
+      } else {
+        setPersonalScores([]);
       }
     } catch (error) {
       console.error('Error in fetchHighScores:', error);
     }
 
     setLoading(false);
-  }, [gameMode, playerName, sessionId]);
+  }, [gameMode, user]);
 
   const submitScore = useCallback(async (score: number, timeElapsed: number) => {
+    if (!user) {
+      console.log('User not authenticated, cannot submit score');
+      return;
+    }
+
     // Create a unique key for this score submission to prevent duplicates
     const scoreKey = `${gameMode}-${score}-${timeElapsed}-${Date.now()}`;
     
@@ -90,17 +96,15 @@ export const useHighScores = (gameMode: string) => {
     submittedScoresRef.current.add(scoreKey);
 
     try {
-      console.log('Submitting score with sessionId:', sessionId, 'playerName:', playerName);
+      console.log('Submitting score for user:', user.id);
       
-      // Always submit directly to Supabase using session ID and current player name
       const { data, error } = await supabase
         .from('high_scores')
         .insert({
           game_mode: gameMode,
           score,
           time_elapsed: timeElapsed,
-          player_name: playerName || null, // Use current player name or null
-          user_id: sessionId // Use session ID as user_id
+          user_id: user.id
         })
         .select();
 
@@ -117,34 +121,7 @@ export const useHighScores = (gameMode: string) => {
       console.error('Error in submitScore:', error);
       submittedScoresRef.current.delete(scoreKey);
     }
-  }, [gameMode, playerName, sessionId, fetchHighScores]);
-
-  const updatePlayerNameInScores = useCallback(async () => {
-    if (!playerName || !sessionId) {
-      console.log('No player name or session ID available for update');
-      return;
-    }
-
-    try {
-      console.log('Updating player name for sessionId:', sessionId, 'to:', playerName);
-      
-      // Update all scores for this session with the new player name (across ALL game modes)
-      const { error } = await supabase
-        .from('high_scores')
-        .update({ player_name: playerName })
-        .eq('user_id', sessionId);
-
-      if (error) {
-        console.error('Error updating player name in scores:', error);
-      } else {
-        console.log('Player name updated in all scores for session across all game modes');
-        // Refresh scores after updating
-        await fetchHighScores();
-      }
-    } catch (error) {
-      console.error('Error in updatePlayerNameInScores:', error);
-    }
-  }, [playerName, sessionId, fetchHighScores]);
+  }, [gameMode, user, fetchHighScores]);
 
   useEffect(() => {
     fetchHighScores();
@@ -155,7 +132,6 @@ export const useHighScores = (gameMode: string) => {
     personalScores,
     loading,
     submitScore,
-    updatePlayerNameInScores,
     refetch: fetchHighScores
   };
 };

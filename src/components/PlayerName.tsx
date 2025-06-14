@@ -1,32 +1,28 @@
 
 import React, { useState } from 'react';
-import { usePlayerName } from '@/hooks/usePlayerName';
-import { useHighScores } from '@/hooks/useHighScores';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 const PlayerName: React.FC = () => {
-  const { playerName, setPlayerName } = usePlayerName();
+  const { user } = useAuth();
+  const { profile, updateDisplayName } = useProfile();
   const [editing, setEditing] = useState(false);
-  const [tempName, setTempName] = useState(playerName);
-  
-  // We'll use find-flag as the default mode for updating scores
-  // This will update scores across all game modes for this session
-  const { updatePlayerNameInScores } = useHighScores('find-flag');
+  const [tempName, setTempName] = useState('');
+
+  const displayName = profile?.display_name || 'Anonymous';
+
+  const handleEditStart = () => {
+    setTempName(profile?.display_name || '');
+    setEditing(true);
+  };
 
   const handleSave = async () => {
-    if (tempName.trim() && tempName.trim() !== playerName) {
-      const oldName = playerName;
-      setPlayerName(tempName.trim());
-      setEditing(false);
-      
-      // If the name actually changed, update all scores for this session
-      if (oldName !== tempName.trim()) {
-        console.log('Player name changed at top, updating all scores...');
-        // Small delay to ensure the name is saved first
-        setTimeout(async () => {
-          await updatePlayerNameInScores();
-        }, 100);
-      }
-    } else {
+    if (!user) return;
+    
+    const trimmedName = tempName.trim();
+    const success = await updateDisplayName(trimmedName);
+    
+    if (success) {
       setEditing(false);
     }
   };
@@ -35,10 +31,18 @@ const PlayerName: React.FC = () => {
     if (e.key === 'Enter') {
       handleSave();
     } else if (e.key === 'Escape') {
-      setTempName(playerName);
+      setTempName(profile?.display_name || '');
       setEditing(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="text-white">
+        Guest Player
+      </div>
+    );
+  }
 
   if (editing) {
     return (
@@ -50,6 +54,7 @@ const PlayerName: React.FC = () => {
           onKeyDown={handleKeyPress}
           onBlur={handleSave}
           autoFocus
+          placeholder="Enter display name"
         />
         <button onClick={handleSave} className="text-sm underline text-white">
           Save
@@ -60,13 +65,10 @@ const PlayerName: React.FC = () => {
 
   return (
     <button
-      onClick={() => {
-        setTempName(playerName);
-        setEditing(true);
-      }}
+      onClick={handleEditStart}
       className="text-white hover:text-blue-200"
     >
-      {playerName || 'Set Name'}
+      {displayName}
     </button>
   );
 };
