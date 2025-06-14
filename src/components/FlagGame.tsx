@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import FlagCard from './FlagCard';
 import GameHeader from './GameHeader';
@@ -37,7 +38,7 @@ const FlagGame = () => {
 
   const initializeFindFlagGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
-    const selectedFlags = shuffledCountries.slice(0, 25);
+    const selectedFlags = shuffledCountries.slice(0, 20);
     setGameFlags(selectedFlags);
     
     const randomTarget = selectedFlags[Math.floor(Math.random() * selectedFlags.length)];
@@ -118,7 +119,7 @@ const FlagGame = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
       <GameHeader
         timeElapsed={timeElapsed}
         onBackToMenu={handleBackToMenu}
@@ -143,7 +144,7 @@ const FlagGame = () => {
           onPlayAgain={initializeFindFlagGame}
           onBackToMenu={handleBackToMenu}
           gameMode={gameMode}
-          score={25}
+          score={20}
         />
       ) : currentTarget ? (
         <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
