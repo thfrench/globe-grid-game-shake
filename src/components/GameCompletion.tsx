@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,12 +25,20 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   const { playerName, setPlayerName } = usePlayerName();
   const { submitScore } = useHighScores(gameMode);
   const [nameInput, setNameInput] = useState(playerName);
+  const scoreSubmittedRef = useRef(false);
 
   useEffect(() => {
-    if (playerName) {
+    // Only submit score once when component mounts
+    if (!scoreSubmittedRef.current) {
+      scoreSubmittedRef.current = true;
       submitScore(score, timeElapsed);
     }
-  }, [playerName, score, timeElapsed, submitScore]);
+  }, []); // Empty dependency array to run only once
+
+  const handleSaveName = () => {
+    setPlayerName(nameInput);
+    // Don't resubmit score when name changes - score was already submitted
+  };
 
   return (
     <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
@@ -44,8 +52,13 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
         <div className="mb-4 space-y-2">
           <p className="text-sm text-gray-600">Enter your name to save scores:</p>
           <div className="flex items-center gap-2 justify-center">
-            <Input value={nameInput} onChange={(e) => setNameInput(e.target.value)} className="w-40" />
-            <Button size="sm" onClick={() => setPlayerName(nameInput)}>
+            <Input 
+              value={nameInput} 
+              onChange={(e) => setNameInput(e.target.value)} 
+              className="w-40" 
+              placeholder="Enter your name"
+            />
+            <Button size="sm" onClick={handleSaveName}>
               Save
             </Button>
           </div>
