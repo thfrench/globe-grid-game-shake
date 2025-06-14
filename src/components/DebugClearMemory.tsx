@@ -14,8 +14,8 @@ const DebugClearMemory: React.FC = () => {
     }
   };
 
-  // Only show if debug parameter is present
-  const isDebugMode = new URLSearchParams(window.location.search).has('debug');
+  // Check for debug in hash instead of search params
+  const isDebugMode = window.location.hash.includes('debug');
   
   if (!isDebugMode) {
     return null;
