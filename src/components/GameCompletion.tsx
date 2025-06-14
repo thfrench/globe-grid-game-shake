@@ -23,21 +23,26 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   score = 25
 }) => {
   const { playerName, setPlayerName } = usePlayerName();
-  const { submitScore } = useHighScores(gameMode);
+  const { submitScore, submitLocalScoresToSupabase } = useHighScores(gameMode);
   const [nameInput, setNameInput] = useState(playerName);
   const scoreSubmittedRef = useRef(false);
 
   useEffect(() => {
-    // Only submit score once when component mounts
+    // Always submit score locally first (this handles the local storage)
     if (!scoreSubmittedRef.current) {
       scoreSubmittedRef.current = true;
       submitScore(score, timeElapsed);
     }
-  }, []); // Empty dependency array to run only once
+  }, []);
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
+    const wasAnonymous = !playerName;
     setPlayerName(nameInput);
-    // Don't resubmit score when name changes - score was already submitted
+    
+    // If this is the first time setting a name, sync all local scores to Supabase
+    if (wasAnonymous && nameInput.trim()) {
+      await submitLocalScoresToSupabase();
+    }
   };
 
   return (
@@ -50,7 +55,7 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
         <p className="text-sm text-gray-600 mb-4">Your score has been saved!</p>
       ) : (
         <div className="mb-4 space-y-2">
-          <p className="text-sm text-gray-600">Enter your name to save scores:</p>
+          <p className="text-sm text-gray-600">Enter your name to save scores globally:</p>
           <div className="flex items-center gap-2 justify-center">
             <Input 
               value={nameInput} 

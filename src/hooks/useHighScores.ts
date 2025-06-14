@@ -60,10 +60,10 @@ export const useHighScores = (gameMode: string) => {
         const data: LocalScoreData[] = JSON.parse(raw);
         // Filter scores by session ID and ensure they have the current player name
         const sessionScores = data
-          .filter(score => score.session_id === sessionId || !score.session_id) // Include scores without session_id for backwards compatibility
+          .filter(score => score.session_id === sessionId || !score.session_id)
           .map(score => ({
             ...score,
-            player_name: playerName || 'Anonymous' // Always use current player name
+            player_name: playerName || 'Anonymous'
           }))
           .sort((a, b) => a.time_elapsed - b.time_elapsed)
           .reduce((acc: LocalScoreData[], current) => {
@@ -129,25 +129,9 @@ export const useHighScores = (gameMode: string) => {
         console.log('Score saved to localStorage:', { score, timeElapsed, playerName, gameMode });
       }
 
-      // If player has a name, save to Supabase
+      // If player has a name, save to Supabase immediately
       if (playerName) {
-        const { data, error } = await supabase
-          .from('high_scores')
-          .insert({
-            game_mode: gameMode,
-            score,
-            time_elapsed: timeElapsed,
-            player_name: playerName
-          })
-          .select();
-
-        if (error) {
-          console.error('Error submitting score to Supabase:', error);
-          submittedScoresRef.current.delete(scoreKey);
-          return;
-        } else {
-          console.log('Score successfully submitted to Supabase:', data);
-        }
+        await submitToSupabase(score, timeElapsed, playerName);
       } else {
         console.log('No player name set, score only saved locally');
       }
@@ -160,6 +144,62 @@ export const useHighScores = (gameMode: string) => {
     }
   }, [gameMode, playerName, sessionId, fetchHighScores]);
 
+  const submitToSupabase = async (score: number, timeElapsed: number, name: string) => {
+    const { data, error } = await supabase
+      .from('high_scores')
+      .insert({
+        game_mode: gameMode,
+        score,
+        time_elapsed: timeElapsed,
+        player_name: name
+      })
+      .select();
+
+    if (error) {
+      console.error('Error submitting score to Supabase:', error);
+      throw error;
+    } else {
+      console.log('Score successfully submitted to Supabase:', data);
+    }
+  };
+
+  const submitLocalScoresToSupabase = useCallback(async () => {
+    if (!playerName) {
+      console.log('No player name, cannot sync to Supabase');
+      return;
+    }
+
+    try {
+      // Get all game modes and sync their scores
+      const gameModes = ['find-flag', 'name-flag', 'capital-quiz'];
+      
+      for (const mode of gameModes) {
+        const raw = localStorage.getItem(localScoresKey(mode));
+        if (raw) {
+          const localScores: LocalScoreData[] = JSON.parse(raw);
+          const sessionScores = localScores.filter(score => 
+            score.session_id === sessionId || !score.session_id
+          );
+
+          for (const score of sessionScores) {
+            try {
+              await submitToSupabase(score.score, score.time_elapsed, playerName);
+            } catch (error) {
+              console.error('Error syncing score to Supabase:', error);
+              // Continue with other scores even if one fails
+            }
+          }
+        }
+      }
+
+      // Refresh scores after syncing
+      await fetchHighScores();
+      console.log('Local scores synced to Supabase');
+    } catch (error) {
+      console.error('Error in submitLocalScoresToSupabase:', error);
+    }
+  }, [playerName, sessionId, fetchHighScores]);
+
   useEffect(() => {
     fetchHighScores();
   }, [fetchHighScores]);
@@ -169,6 +209,7 @@ export const useHighScores = (gameMode: string) => {
     personalScores,
     loading,
     submitScore,
+    submitLocalScoresToSupabase,
     refetch: fetchHighScores
   };
 };
