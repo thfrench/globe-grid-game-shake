@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { usePlayerName } from './usePlayerName';
@@ -14,12 +15,14 @@ interface LocalScoreData {
   score: number;
   time_elapsed: number;
   created_at: string;
+  session_id?: string;
+  player_name?: string;
 }
 
 const localScoresKey = (gameMode: string) => `local_scores_${gameMode}`;
 
 export const useHighScores = (gameMode: string) => {
-  const { playerName } = usePlayerName();
+  const { playerName, sessionId } = usePlayerName();
   const [globalScores, setGlobalScores] = useState<HighScore[]>([]);
   const [personalScores, setPersonalScores] = useState<HighScore[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,12 +50,17 @@ export const useHighScores = (gameMode: string) => {
       setGlobalScores(transformedGlobalData);
     }
 
-    // Always use local storage for personal scores to avoid name-based filtering issues
+    // Get personal scores based on session ID
     const raw = localStorage.getItem(localScoresKey(gameMode));
     if (raw) {
       const data: LocalScoreData[] = JSON.parse(raw);
-      // Remove duplicates and get unique scores by time_elapsed, keep best ones
-      const uniqueScores = data
+      // Filter scores by session ID and ensure they have the current player name
+      const sessionScores = data
+        .filter(score => score.session_id === sessionId || !score.session_id) // Include scores without session_id for backwards compatibility
+        .map(score => ({
+          ...score,
+          player_name: playerName || 'Anonymous' // Always use current player name
+        }))
         .sort((a, b) => a.time_elapsed - b.time_elapsed)
         .reduce((acc: LocalScoreData[], current) => {
           const exists = acc.find(item => item.time_elapsed === current.time_elapsed);
@@ -67,15 +75,15 @@ export const useHighScores = (gameMode: string) => {
           score: s.score,
           time_elapsed: s.time_elapsed,
           created_at: s.created_at,
-          player_name: playerName || 'Anonymous'
+          player_name: s.player_name || playerName || 'Anonymous'
         }));
-      setPersonalScores(uniqueScores);
+      setPersonalScores(sessionScores);
     } else {
       setPersonalScores([]);
     }
 
     setLoading(false);
-  }, [gameMode, playerName]);
+  }, [gameMode, playerName, sessionId]);
 
   const submitScore = useCallback(async (score: number, timeElapsed: number) => {
     // Create a unique key for this score submission to prevent duplicates
@@ -104,24 +112,30 @@ export const useHighScores = (gameMode: string) => {
 
         if (error) {
           console.error('Error submitting score:', error);
-          // Remove from submitted set if there was an error
           submittedScoresRef.current.delete(scoreKey);
           return;
         }
       }
 
-      // Always save to local storage as well (for personal scores tracking)
+      // Always save to local storage with session ID
       const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
       const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
       
-      // Check if this exact score already exists in local storage
+      // Check if this exact score already exists for this session
       const exists = localData.find(item => 
         item.time_elapsed === timeElapsed && 
-        item.score === score
+        item.score === score &&
+        (item.session_id === sessionId || !item.session_id)
       );
       
       if (!exists) {
-        localData.push({ score, time_elapsed: timeElapsed, created_at: new Date().toISOString() });
+        localData.push({ 
+          score, 
+          time_elapsed: timeElapsed, 
+          created_at: new Date().toISOString(),
+          session_id: sessionId,
+          player_name: playerName
+        });
         localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
       }
       
@@ -129,10 +143,9 @@ export const useHighScores = (gameMode: string) => {
       fetchHighScores();
     } catch (error) {
       console.error('Error in submitScore:', error);
-      // Remove from submitted set if there was an error
       submittedScoresRef.current.delete(scoreKey);
     }
-  }, [gameMode, playerName, fetchHighScores]);
+  }, [gameMode, playerName, sessionId, fetchHighScores]);
 
   useEffect(() => {
     fetchHighScores();
