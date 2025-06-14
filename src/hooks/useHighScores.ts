@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { usePlayerName } from './usePlayerName';
 
 export interface HighScore {
@@ -9,9 +8,7 @@ export interface HighScore {
   score: number;
   time_elapsed: number;
   created_at: string;
-  profiles: {
-    display_name: string;
-  };
+  player_name: string;
 }
 
 interface LocalScoreData {
@@ -23,7 +20,6 @@ interface LocalScoreData {
 const localScoresKey = (gameMode: string) => `local_scores_${gameMode}`;
 
 export const useHighScores = (gameMode: string) => {
-  const { user } = useAuth();
   const { playerName } = usePlayerName();
   const [globalScores, setGlobalScores] = useState<HighScore[]>([]);
   const [personalScores, setPersonalScores] = useState<HighScore[]>([]);
@@ -32,66 +28,47 @@ export const useHighScores = (gameMode: string) => {
   const fetchHighScores = useCallback(async () => {
     setLoading(true);
     
-    // Fetch global high scores with proper join using the foreign key relationship
+    // Fetch global high scores
     const { data: globalData } = await supabase
       .from('high_scores')
-      .select(`
-        id,
-        score,
-        time_elapsed,
-        created_at,
-        user_id,
-        profiles!fk_high_scores_user_id(display_name)
-      `)
+      .select('*')
       .eq('game_mode', gameMode)
       .order('time_elapsed', { ascending: true })
       .limit(10);
 
     if (globalData) {
-      // Transform the data to match our interface
       const transformedGlobalData = globalData.map(item => ({
         id: item.id,
         score: item.score,
         time_elapsed: item.time_elapsed,
         created_at: item.created_at,
-        profiles: {
-          display_name: item.profiles?.display_name || 'Anonymous'
-        }
+        player_name: item.player_name || 'Anonymous'
       }));
       setGlobalScores(transformedGlobalData);
     }
 
-    // Fetch personal high scores if user is logged in
-    if (user) {
+    // Fetch personal high scores based on player name
+    if (playerName) {
       const { data: personalData } = await supabase
         .from('high_scores')
-        .select(`
-          id,
-          score,
-          time_elapsed,
-          created_at,
-          user_id,
-          profiles!fk_high_scores_user_id(display_name)
-        `)
+        .select('*')
         .eq('game_mode', gameMode)
-        .eq('user_id', user.id)
+        .eq('player_name', playerName)
         .order('time_elapsed', { ascending: true })
         .limit(5);
 
       if (personalData) {
-        // Transform the data to match our interface
         const transformedPersonalData = personalData.map(item => ({
           id: item.id,
           score: item.score,
           time_elapsed: item.time_elapsed,
           created_at: item.created_at,
-          profiles: {
-            display_name: item.profiles?.display_name || 'Anonymous'
-          }
+          player_name: item.player_name || 'Anonymous'
         }));
         setPersonalScores(transformedPersonalData);
       }
     } else {
+      // Fall back to local storage for personal scores
       const raw = localStorage.getItem(localScoresKey(gameMode));
       if (raw) {
         const data: LocalScoreData[] = JSON.parse(raw);
@@ -103,7 +80,7 @@ export const useHighScores = (gameMode: string) => {
             score: s.score,
             time_elapsed: s.time_elapsed,
             created_at: s.created_at,
-            profiles: { display_name: playerName || 'Anonymous' }
+            player_name: 'Anonymous'
           }));
         setPersonalScores(mapped);
       } else {
@@ -112,30 +89,31 @@ export const useHighScores = (gameMode: string) => {
     }
 
     setLoading(false);
-  }, [gameMode, user, playerName]);
+  }, [gameMode, playerName]);
 
   const submitScore = async (score: number, timeElapsed: number) => {
+    // Always save to local storage as backup
     const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
     const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
     localData.push({ score, time_elapsed: timeElapsed, created_at: new Date().toISOString() });
     localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
 
-    if (!user) {
+    // If player has a name, save to Supabase
+    if (playerName) {
+      const { error } = await supabase
+        .from('high_scores')
+        .insert({
+          game_mode: gameMode,
+          score,
+          time_elapsed: timeElapsed,
+          player_name: playerName
+        });
+
+      if (!error) {
+        fetchHighScores(); // Refresh scores after submission
+      }
+    } else {
       fetchHighScores();
-      return;
-    }
-
-    const { error } = await supabase
-      .from('high_scores')
-      .insert({
-        user_id: user.id,
-        game_mode: gameMode,
-        score,
-        time_elapsed: timeElapsed
-      });
-
-    if (!error) {
-      fetchHighScores(); // Refresh scores after submission
     }
   };
 

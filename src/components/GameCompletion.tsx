@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { formatTime } from '../utils/gameUtils';
 import { useHighScores } from '@/hooks/useHighScores';
-import { useAuth } from '@/contexts/AuthContext';
 import { usePlayerName } from '@/hooks/usePlayerName';
 
 interface GameCompletionProps {
@@ -23,16 +22,15 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   gameMode,
   score = 25
 }) => {
-  const { user } = useAuth();
   const { playerName, setPlayerName } = usePlayerName();
   const { submitScore } = useHighScores(gameMode);
   const [nameInput, setNameInput] = useState(playerName);
 
   useEffect(() => {
-    if (user || playerName) {
+    if (playerName) {
       submitScore(score, timeElapsed);
     }
-  }, [user, playerName, score, timeElapsed, submitScore]);
+  }, [playerName, score, timeElapsed, submitScore]);
 
   return (
     <Card className="p-8 text-center bg-white/80 backdrop-blur-sm">
@@ -40,7 +38,7 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
       <p className="text-xl text-gray-700 mb-4">
         You completed the game in {formatTime(timeElapsed)}!
       </p>
-      {user || playerName ? (
+      {playerName ? (
         <p className="text-sm text-gray-600 mb-4">Your score has been saved!</p>
       ) : (
         <div className="mb-4 space-y-2">

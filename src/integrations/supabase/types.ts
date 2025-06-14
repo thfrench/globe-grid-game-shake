@@ -14,35 +14,30 @@ export type Database = {
           created_at: string
           game_mode: string
           id: string
+          player_name: string | null
           score: number
           time_elapsed: number
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           game_mode: string
           id?: string
+          player_name?: string | null
           score: number
           time_elapsed: number
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           game_mode?: string
           id?: string
+          player_name?: string | null
           score?: number
           time_elapsed?: number
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "fk_high_scores_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
