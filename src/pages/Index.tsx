@@ -2,6 +2,7 @@
 import React from 'react';
 import FlagGame from '@/components/FlagGame';
 import PlayerName from '@/components/PlayerName';
+import DebugClearMemory from '@/components/DebugClearMemory';
 
 const Index = () => {
   return (
@@ -18,7 +19,10 @@ const Index = () => {
       
       <div className="relative z-10 max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <PlayerName />
+          <div className="flex items-center">
+            <PlayerName />
+            <DebugClearMemory />
+          </div>
         </div>
 
         <div className="text-center mb-6 px-4">

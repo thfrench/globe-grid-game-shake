@@ -16,7 +16,7 @@ const getOrCreateSessionId = (): string => {
 
 export const usePlayerName = () => {
   const [playerName, setPlayerNameState] = useState('');
-  const [sessionId] = useState(getOrCreateSessionId());
+  const [sessionId, setSessionId] = useState(getOrCreateSessionId());
 
   useEffect(() => {
     const stored = localStorage.getItem(PLAYER_NAME_KEY);
@@ -52,5 +52,23 @@ export const usePlayerName = () => {
     });
   };
 
-  return { playerName, setPlayerName, sessionId };
+  const clearAllData = () => {
+    // Clear all localStorage data
+    localStorage.clear();
+    
+    // Clear all cookies
+    document.cookie.split(";").forEach(cookie => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    });
+    
+    // Reset state
+    setPlayerNameState('');
+    setSessionId(getOrCreateSessionId());
+    
+    console.log('All local data cleared');
+  };
+
+  return { playerName, setPlayerName, sessionId, clearAllData };
 };
