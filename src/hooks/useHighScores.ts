@@ -31,55 +31,62 @@ export const useHighScores = (gameMode: string) => {
   const fetchHighScores = useCallback(async () => {
     setLoading(true);
     
-    // Fetch global high scores
-    const { data: globalData } = await supabase
-      .from('high_scores')
-      .select('*')
-      .eq('game_mode', gameMode)
-      .order('time_elapsed', { ascending: true })
-      .limit(10);
+    try {
+      // Fetch global high scores
+      const { data: globalData, error: globalError } = await supabase
+        .from('high_scores')
+        .select('*')
+        .eq('game_mode', gameMode)
+        .order('time_elapsed', { ascending: true })
+        .limit(10);
 
-    if (globalData) {
-      const transformedGlobalData = globalData.map(item => ({
-        id: item.id,
-        score: item.score,
-        time_elapsed: item.time_elapsed,
-        created_at: item.created_at,
-        player_name: item.player_name || 'Anonymous'
-      }));
-      setGlobalScores(transformedGlobalData);
-    }
-
-    // Get personal scores based on session ID
-    const raw = localStorage.getItem(localScoresKey(gameMode));
-    if (raw) {
-      const data: LocalScoreData[] = JSON.parse(raw);
-      // Filter scores by session ID and ensure they have the current player name
-      const sessionScores = data
-        .filter(score => score.session_id === sessionId || !score.session_id) // Include scores without session_id for backwards compatibility
-        .map(score => ({
-          ...score,
-          player_name: playerName || 'Anonymous' // Always use current player name
-        }))
-        .sort((a, b) => a.time_elapsed - b.time_elapsed)
-        .reduce((acc: LocalScoreData[], current) => {
-          const exists = acc.find(item => item.time_elapsed === current.time_elapsed);
-          if (!exists) {
-            acc.push(current);
-          }
-          return acc;
-        }, [])
-        .slice(0, 5)
-        .map((s, index) => ({
-          id: index.toString(),
-          score: s.score,
-          time_elapsed: s.time_elapsed,
-          created_at: s.created_at,
-          player_name: s.player_name || playerName || 'Anonymous'
+      if (globalError) {
+        console.error('Error fetching global scores:', globalError);
+      } else if (globalData) {
+        const transformedGlobalData = globalData.map(item => ({
+          id: item.id,
+          score: item.score,
+          time_elapsed: item.time_elapsed,
+          created_at: item.created_at,
+          player_name: item.player_name || 'Anonymous'
         }));
-      setPersonalScores(sessionScores);
-    } else {
-      setPersonalScores([]);
+        setGlobalScores(transformedGlobalData);
+        console.log('Global scores fetched:', transformedGlobalData);
+      }
+
+      // Get personal scores based on session ID
+      const raw = localStorage.getItem(localScoresKey(gameMode));
+      if (raw) {
+        const data: LocalScoreData[] = JSON.parse(raw);
+        // Filter scores by session ID and ensure they have the current player name
+        const sessionScores = data
+          .filter(score => score.session_id === sessionId || !score.session_id) // Include scores without session_id for backwards compatibility
+          .map(score => ({
+            ...score,
+            player_name: playerName || 'Anonymous' // Always use current player name
+          }))
+          .sort((a, b) => a.time_elapsed - b.time_elapsed)
+          .reduce((acc: LocalScoreData[], current) => {
+            const exists = acc.find(item => item.time_elapsed === current.time_elapsed);
+            if (!exists) {
+              acc.push(current);
+            }
+            return acc;
+          }, [])
+          .slice(0, 5)
+          .map((s, index) => ({
+            id: index.toString(),
+            score: s.score,
+            time_elapsed: s.time_elapsed,
+            created_at: s.created_at,
+            player_name: s.player_name || playerName || 'Anonymous'
+          }));
+        setPersonalScores(sessionScores);
+      } else {
+        setPersonalScores([]);
+      }
+    } catch (error) {
+      console.error('Error in fetchHighScores:', error);
     }
 
     setLoading(false);
@@ -99,25 +106,7 @@ export const useHighScores = (gameMode: string) => {
     submittedScoresRef.current.add(scoreKey);
 
     try {
-      // If player has a name, save to Supabase
-      if (playerName) {
-        const { error } = await supabase
-          .from('high_scores')
-          .insert({
-            game_mode: gameMode,
-            score,
-            time_elapsed: timeElapsed,
-            player_name: playerName
-          });
-
-        if (error) {
-          console.error('Error submitting score:', error);
-          submittedScoresRef.current.delete(scoreKey);
-          return;
-        }
-      }
-
-      // Always save to local storage with session ID
+      // Always save to local storage with session ID first
       const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
       const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
       
@@ -137,10 +126,34 @@ export const useHighScores = (gameMode: string) => {
           player_name: playerName
         });
         localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
+        console.log('Score saved to localStorage:', { score, timeElapsed, playerName, gameMode });
+      }
+
+      // If player has a name, save to Supabase
+      if (playerName) {
+        const { data, error } = await supabase
+          .from('high_scores')
+          .insert({
+            game_mode: gameMode,
+            score,
+            time_elapsed: timeElapsed,
+            player_name: playerName
+          })
+          .select();
+
+        if (error) {
+          console.error('Error submitting score to Supabase:', error);
+          submittedScoresRef.current.delete(scoreKey);
+          return;
+        } else {
+          console.log('Score successfully submitted to Supabase:', data);
+        }
+      } else {
+        console.log('No player name set, score only saved locally');
       }
       
       // Refresh scores after successful submission
-      fetchHighScores();
+      await fetchHighScores();
     } catch (error) {
       console.error('Error in submitScore:', error);
       submittedScoresRef.current.delete(scoreKey);

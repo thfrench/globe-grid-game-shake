@@ -19,6 +19,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   onModeSelect, 
   onStartGame 
 }) => {
+  // Always call hooks in the same order - fix the hook order issue
   const { playerName } = usePlayerName();
   const { globalScores, personalScores, loading } = useHighScores(selectedMode);
 
@@ -27,7 +28,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
       id: 'find-flag' as GameMode,
       icon: '🔍',
       title: 'Find the Flag',
-      description: 'Look at a 5x5 grid of flags and click on the correct flag for the given country name. Test your visual recognition skills!'
+      description: 'Look at a 4x5 grid of flags and click on the correct flag for the given country name. Test your visual recognition skills!'
     },
     {
       id: 'name-flag' as GameMode,
