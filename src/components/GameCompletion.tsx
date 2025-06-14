@@ -28,20 +28,27 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
   const scoreSubmittedRef = useRef(false);
 
   useEffect(() => {
-    // Always submit score to database with session ID
+    // Always submit score to database with session ID and current player name
     if (!scoreSubmittedRef.current) {
       scoreSubmittedRef.current = true;
+      console.log('Submitting score with current player name:', playerName);
       submitScore(score, timeElapsed);
     }
-  }, []);
+  }, [submitScore, score, timeElapsed, playerName]);
 
   const handleSaveName = async () => {
-    const wasAnonymous = !playerName;
-    setPlayerName(nameInput);
-    
-    // If this is the first time setting a name, update all scores for this session
-    if (wasAnonymous && nameInput.trim()) {
-      await updatePlayerNameInScores();
+    if (nameInput.trim()) {
+      const wasAnonymous = !playerName;
+      setPlayerName(nameInput.trim());
+      
+      // If this is the first time setting a name or changing it, update all scores for this session
+      if (wasAnonymous || nameInput.trim() !== playerName) {
+        console.log('Updating player name in all scores...');
+        // Small delay to ensure the name is saved first
+        setTimeout(async () => {
+          await updatePlayerNameInScores();
+        }, 100);
+      }
     }
   };
 
@@ -52,7 +59,7 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
         You completed the game in {formatTime(timeElapsed)}!
       </p>
       {playerName ? (
-        <p className="text-sm text-gray-600 mb-4">Your score has been saved!</p>
+        <p className="text-sm text-gray-600 mb-4">Your score has been saved as {playerName}!</p>
       ) : (
         <div className="mb-4 space-y-2">
           <p className="text-sm text-gray-600">Enter your name to update all your scores:</p>
@@ -62,8 +69,13 @@ const GameCompletion: React.FC<GameCompletionProps> = ({
               onChange={(e) => setNameInput(e.target.value)} 
               className="w-40" 
               placeholder="Enter your name"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveName();
+                }
+              }}
             />
-            <Button size="sm" onClick={handleSaveName}>
+            <Button size="sm" onClick={handleSaveName} disabled={!nameInput.trim()}>
               Save
             </Button>
           </div>

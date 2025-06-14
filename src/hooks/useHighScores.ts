@@ -93,14 +93,14 @@ export const useHighScores = (gameMode: string) => {
     try {
       console.log('Submitting score with sessionId:', sessionId, 'playerName:', playerName);
       
-      // Always submit directly to Supabase using session ID
+      // Always submit directly to Supabase using session ID and current player name
       const { data, error } = await supabase
         .from('high_scores')
         .insert({
           game_mode: gameMode,
           score,
           time_elapsed: timeElapsed,
-          player_name: playerName || null,
+          player_name: playerName || null, // Use current player name or null
           user_id: sessionId // Use session ID as user_id
         })
         .select();
@@ -121,7 +121,10 @@ export const useHighScores = (gameMode: string) => {
   }, [gameMode, playerName, sessionId, fetchHighScores]);
 
   const updatePlayerNameInScores = useCallback(async () => {
-    if (!playerName || !sessionId) return;
+    if (!playerName || !sessionId) {
+      console.log('No player name or session ID available for update');
+      return;
+    }
 
     try {
       console.log('Updating player name for sessionId:', sessionId, 'to:', playerName);
