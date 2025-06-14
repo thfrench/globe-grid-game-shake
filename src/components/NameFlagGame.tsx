@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import GameHeader from './GameHeader';
 import GameCompletion from './GameCompletion';
@@ -25,7 +26,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
 
   const initializeGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
-    const selectedCountries = shuffledCountries.slice(0, 20);
+    const selectedCountries = shuffledCountries.slice(0, 25);
     setGameCountries(selectedCountries);
     
     const firstCountry = selectedCountries[0];
@@ -100,7 +101,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
       <GameHeader
         timeElapsed={timeElapsed}
         currentQuestion={currentQuestionIndex}
-        totalQuestions={20}
+        totalQuestions={25}
         onBackToMenu={onBackToMenu}
         feedback={feedback}
       />
@@ -111,7 +112,7 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
           onPlayAgain={initializeGame}
           onBackToMenu={onBackToMenu}
           gameMode="name-flag"
-          score={20}
+          score={25}
         />
       ) : currentFlag ? (
         <div className="space-y-6">
@@ -138,3 +139,4 @@ const NameFlagGame: React.FC<NameFlagGameProps> = ({ onBackToMenu }) => {
 };
 
 export default NameFlagGame;
+
