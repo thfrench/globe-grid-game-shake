@@ -45,6 +45,10 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
 
   const selectedModeData = gameModes.find(mode => mode.id === selectedMode);
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <Card className="p-4 text-center bg-white/90 backdrop-blur-sm shadow-xl">
@@ -111,7 +115,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
             <div className="space-y-1 text-sm">
               {personalScores.map((score, index) => (
                 <div key={score.id} className="flex justify-between">
-                  <span>{index + 1}. Your best</span>
+                  <span>{index + 1}. {formatDate(score.created_at)}</span>
                   <span className="font-mono">{formatTime(score.time_elapsed)}</span>
                 </div>
               ))}

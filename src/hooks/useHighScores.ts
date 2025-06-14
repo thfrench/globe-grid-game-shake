@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { usePlayerName } from './usePlayerName';
@@ -68,12 +67,20 @@ export const useHighScores = (gameMode: string) => {
         setPersonalScores(transformedPersonalData);
       }
     } else {
-      // Fall back to local storage for personal scores
+      // Fall back to local storage for personal scores - remove duplicates
       const raw = localStorage.getItem(localScoresKey(gameMode));
       if (raw) {
         const data: LocalScoreData[] = JSON.parse(raw);
-        const mapped = data
+        // Remove duplicates and get unique scores by time_elapsed, keep best ones
+        const uniqueScores = data
           .sort((a, b) => a.time_elapsed - b.time_elapsed)
+          .reduce((acc: LocalScoreData[], current) => {
+            const exists = acc.find(item => item.time_elapsed === current.time_elapsed);
+            if (!exists) {
+              acc.push(current);
+            }
+            return acc;
+          }, [])
           .slice(0, 5)
           .map((s, index) => ({
             id: index.toString(),
@@ -82,7 +89,7 @@ export const useHighScores = (gameMode: string) => {
             created_at: s.created_at,
             player_name: 'Anonymous'
           }));
-        setPersonalScores(mapped);
+        setPersonalScores(uniqueScores);
       } else {
         setPersonalScores([]);
       }
@@ -92,12 +99,6 @@ export const useHighScores = (gameMode: string) => {
   }, [gameMode, playerName]);
 
   const submitScore = async (score: number, timeElapsed: number) => {
-    // Always save to local storage as backup
-    const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
-    const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
-    localData.push({ score, time_elapsed: timeElapsed, created_at: new Date().toISOString() });
-    localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
-
     // If player has a name, save to Supabase
     if (playerName) {
       const { error } = await supabase
@@ -113,6 +114,21 @@ export const useHighScores = (gameMode: string) => {
         fetchHighScores(); // Refresh scores after submission
       }
     } else {
+      // Save to local storage as backup - avoid duplicates
+      const localDataRaw = localStorage.getItem(localScoresKey(gameMode));
+      const localData: LocalScoreData[] = localDataRaw ? JSON.parse(localDataRaw) : [];
+      
+      // Check if this exact score already exists
+      const exists = localData.find(item => 
+        item.time_elapsed === timeElapsed && 
+        item.score === score
+      );
+      
+      if (!exists) {
+        localData.push({ score, time_elapsed: timeElapsed, created_at: new Date().toISOString() });
+        localStorage.setItem(localScoresKey(gameMode), JSON.stringify(localData));
+      }
+      
       fetchHighScores();
     }
   };
