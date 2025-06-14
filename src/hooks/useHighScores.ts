@@ -24,6 +24,8 @@ export const useHighScores = (gameMode: string) => {
     setLoading(true);
     
     try {
+      console.log('Fetching scores with sessionId:', sessionId);
+      
       // Fetch global high scores - show all scores including anonymous ones
       const { data: globalData, error: globalError } = await supabase
         .from('high_scores')
@@ -89,6 +91,8 @@ export const useHighScores = (gameMode: string) => {
     submittedScoresRef.current.add(scoreKey);
 
     try {
+      console.log('Submitting score with sessionId:', sessionId, 'playerName:', playerName);
+      
       // Always submit directly to Supabase using session ID
       const { data, error } = await supabase
         .from('high_scores')
@@ -120,6 +124,8 @@ export const useHighScores = (gameMode: string) => {
     if (!playerName || !sessionId) return;
 
     try {
+      console.log('Updating player name for sessionId:', sessionId, 'to:', playerName);
+      
       // Update all scores for this session with the new player name
       const { error } = await supabase
         .from('high_scores')

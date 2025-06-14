@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 const PLAYER_NAME_KEY = 'player_name';
 const SESSION_ID_KEY = 'session_id';
 
-// Generate a unique session ID if one doesn't exist
+// Generate a proper UUID session ID if one doesn't exist
 const getOrCreateSessionId = (): string => {
   let sessionId = localStorage.getItem(SESSION_ID_KEY);
   if (!sessionId) {
-    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate a proper UUID format session ID
+    sessionId = crypto.randomUUID();
     localStorage.setItem(SESSION_ID_KEY, sessionId);
   }
   return sessionId;
