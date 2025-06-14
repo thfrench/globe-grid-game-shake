@@ -38,7 +38,7 @@ const FlagGame = () => {
 
   const initializeFindFlagGame = useCallback(() => {
     const shuffledCountries = shuffleArray(countries);
-    const selectedFlags = shuffledCountries.slice(0, 20);
+    const selectedFlags = shuffledCountries.slice(0, 25);
     setGameFlags(selectedFlags);
     
     const randomTarget = selectedFlags[Math.floor(Math.random() * selectedFlags.length)];
@@ -144,7 +144,7 @@ const FlagGame = () => {
           onPlayAgain={initializeFindFlagGame}
           onBackToMenu={handleBackToMenu}
           gameMode={gameMode}
-          score={20}
+          score={25}
         />
       ) : currentTarget ? (
         <Card className="p-6 text-center bg-white/80 backdrop-blur-sm">
