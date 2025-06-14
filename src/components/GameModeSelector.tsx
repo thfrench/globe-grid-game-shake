@@ -46,7 +46,16 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
   const selectedModeData = gameModes.find(mode => mode.id === selectedMode);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'long' });
+    const year = date.getFullYear();
+    
+    const suffix = day === 1 || day === 21 || day === 31 ? 'st' :
+                   day === 2 || day === 22 ? 'nd' :
+                   day === 3 || day === 23 ? 'rd' : 'th';
+    
+    return `${day}${suffix} ${month} ${year}`;
   };
 
   return (
@@ -91,7 +100,7 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
             <div className="space-y-1 text-sm">
               {globalScores.slice(0, 5).map((score, index) => (
                 <div key={score.id} className="flex justify-between">
-                  <span>{index + 1}. {score.player_name}</span>
+                  <span>{index + 1}. {score.player_name} - {formatDate(score.created_at)}</span>
                   <span className="font-mono">{formatTime(score.time_elapsed)}</span>
                 </div>
               ))}
