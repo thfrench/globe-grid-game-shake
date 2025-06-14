@@ -12,7 +12,7 @@ export interface HighScore {
   game_mode: string;
   profiles?: {
     display_name: string | null;
-  };
+  } | null;
 }
 
 export const useHighScores = (gameMode: string) => {
@@ -42,7 +42,7 @@ export const useHighScores = (gameMode: string) => {
       if (globalError) {
         console.error('Error fetching global scores:', globalError);
       } else if (globalData) {
-        setGlobalScores(globalData);
+        setGlobalScores(globalData as HighScore[]);
         console.log('Global scores fetched:', globalData);
       }
 
@@ -64,7 +64,7 @@ export const useHighScores = (gameMode: string) => {
         if (personalError) {
           console.error('Error fetching personal scores:', personalError);
         } else if (personalData) {
-          setPersonalScores(personalData);
+          setPersonalScores(personalData as HighScore[]);
           console.log('Personal scores fetched:', personalData);
         }
       } else {
